@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera and Microphone Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .video-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+        video {
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            background: #000;
+            border-radius: 8px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .error {
+            color: #dc3545;
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            color: #155724;
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .info {
+            color: #0c5460;
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .troubleshooting {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .troubleshooting h3 {
+            margin-top: 0;
+            color: #856404;
+        }
+        .troubleshooting ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .troubleshooting li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎥 Camera and Microphone Access Test</h1>
+        <p>This test will help diagnose camera and microphone permission issues for the telemedicine platform.</p>
+        
+        <div class="info">
+            <strong>Before starting:</strong>
+            <ul>
+                <li>Make sure you're on HTTPS or localhost</li>
+                <li>Close other applications using your camera (Zoom, Teams, etc.)</li>
+                <li>Current URL: <span id="current-url"></span></li>
+                <li>Secure Context: <span id="secure-context"></span></li>
+            </ul>
+        </div>
+
+        <div class="video-container">
+            <video id="videoElement" autoplay muted playsinline></video>
+            <div>
+                <button id="startBtn">Start Camera & Microphone Test</button>
+                <button id="stopBtn" disabled>Stop Test</button>
+            </div>
+        </div>
+
+        <div id="status"></div>
+        <div id="deviceInfo"></div>
+
+        <div class="troubleshooting">
+            <h3>🔧 Troubleshooting Guide</h3>
+            <ol>
+                <li><strong>Permission Denied:</strong> Click the camera icon in your browser's address bar and allow access</li>
+                <li><strong>No Devices Found:</strong> Check if your camera/microphone are properly connected</li>
+                <li><strong>Device Busy:</strong> Close other applications using your camera (Zoom, Teams, Skype, etc.)</li>
+                <li><strong>Not Secure Context:</strong> Ensure you're on HTTPS or localhost</li>
+                <li><strong>Browser Issues:</strong> Try refreshing the page or restarting your browser</li>
+                <li><strong>System Permissions:</strong> Check your operating system's privacy settings</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        const videoElement = document.getElementById('videoElement');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const statusDiv = document.getElementById('status');
+        const deviceInfoDiv = document.getElementById('deviceInfo');
+        const currentUrlSpan = document.getElementById('current-url');
+        const secureContextSpan = document.getElementById('secure-context');
+        
+        let currentStream = null;
+
+        // Display current context info
+        currentUrlSpan.textContent = window.location.href;
+        secureContextSpan.textContent = window.isSecureContext ? '✅ Yes' : '❌ No';
+        secureContextSpan.className = window.isSecureContext ? 'success' : 'error';
+
+        function showStatus(message, type = 'info') {
+            statusDiv.innerHTML = `<div class="${type}">${message}</div>`;
+        }
+
+        function showDeviceInfo(stream) {
+            const videoTracks = stream.getVideoTracks();
+            const audioTracks = stream.getAudioTracks();
+            
+            let info = '<div class="success"><h3>📱 Device Information</h3>';
+            
+            if (videoTracks.length > 0) {
+                const videoTrack = videoTracks[0];
+                const settings = videoTrack.getSettings();
+                info += `<p><strong>Video:</strong> ${videoTrack.label}</p>`;
+                info += `<p><strong>Resolution:</strong> ${settings.width}x${settings.height}</p>`;
+                info += `<p><strong>Frame Rate:</strong> ${settings.frameRate}fps</p>`;
+            }
+            
+            if (audioTracks.length > 0) {
+                const audioTrack = audioTracks[0];
+                info += `<p><strong>Audio:</strong> ${audioTrack.label}</p>`;
+            }
+            
+            info += '</div>';
+            deviceInfoDiv.innerHTML = info;
+        }
+
+        async function checkPermissions() {
+            if (!navigator.permissions) {
+                return { camera: 'unknown', microphone: 'unknown' };
+            }
+
+            try {
+                const cameraPermission = await navigator.permissions.query({ name: 'camera' });
+                const microphonePermission = await navigator.permissions.query({ name: 'microphone' });
+                
+                return {
+                    camera: cameraPermission.state,
+                    microphone: microphonePermission.state
+                };
+            } catch (error) {
+                return { camera: 'unknown', microphone: 'unknown' };
+            }
+        }
+
+        async function testMediaAccess() {
+            try {
+                showStatus('🔍 Checking permissions...', 'info');
+                const permissions = await checkPermissions();
+                console.log('Permissions:', permissions);
+
+                if (permissions.camera === 'denied' || permissions.microphone === 'denied') {
+                    throw new Error('Camera or microphone permission denied. Please allow access in browser settings.');
+                }
+
+                showStatus('📹 Requesting camera and microphone access...', 'info');
+                
+                // Try different constraint sets
+                const constraintSets = [
+                    { video: { width: 1280, height: 720 }, audio: { echoCancellation: true } },
+                    { video: { width: 640, height: 480 }, audio: true },
+                    { video: true, audio: true },
+                    { video: false, audio: true }, // Audio only fallback
+                ];
+
+                let stream = null;
+                let lastError = null;
+
+                for (let i = 0; i < constraintSets.length; i++) {
+                    try {
+                        console.log(`Trying constraint set ${i + 1}:`, constraintSets[i]);
+                        stream = await navigator.mediaDevices.getUserMedia(constraintSets[i]);
+                        console.log('Success with constraint set:', constraintSets[i]);
+                        break;
+                    } catch (error) {
+                        console.warn(`Constraint set ${i + 1} failed:`, error);
+                        lastError = error;
+                        if (i === constraintSets.length - 1) {
+                            throw error;
+                        }
+                    }
+                }
+
+                if (!stream) {
+                    throw lastError || new Error('Failed to get media stream');
+                }
+
+                currentStream = stream;
+                videoElement.srcObject = stream;
+                
+                showStatus('✅ Camera and microphone access successful!', 'success');
+                showDeviceInfo(stream);
+                
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+
+                // List available devices
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                console.log('Available devices:', devices);
+
+            } catch (error) {
+                console.error('Media access error:', error);
+                let errorMessage = '❌ Media access failed: ';
+                
+                switch (error.name) {
+                    case 'NotAllowedError':
+                        errorMessage += 'Permission denied. Please click the camera icon in your browser address bar and allow access.';
+                        break;
+                    case 'NotFoundError':
+                        errorMessage += 'No camera or microphone found. Please check your devices.';
+                        break;
+                    case 'NotReadableError':
+                        errorMessage += 'Camera or microphone is being used by another application.';
+                        break;
+                    case 'OverconstrainedError':
+                        errorMessage += 'Camera/microphone constraints not supported.';
+                        break;
+                    case 'SecurityError':
+                        errorMessage += 'Security error. Please ensure you are on HTTPS or localhost.';
+                        break;
+                    default:
+                        errorMessage += error.message || 'Unknown error occurred.';
+                }
+                
+                showStatus(errorMessage, 'error');
+            }
+        }
+
+        function stopTest() {
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => {
+                    track.stop();
+                    console.log('Stopped track:', track.kind);
+                });
+                currentStream = null;
+            }
+            
+            videoElement.srcObject = null;
+            showStatus('🛑 Test stopped', 'info');
+            deviceInfoDiv.innerHTML = '';
+            
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+        }
+
+        startBtn.addEventListener('click', testMediaAccess);
+        stopBtn.addEventListener('click', stopTest);
+
+        // Check WebRTC support
+        function checkWebRTCSupport() {
+            const missing = [];
+            
+            if (!navigator.mediaDevices) missing.push('mediaDevices');
+            if (!navigator.mediaDevices?.getUserMedia) missing.push('getUserMedia');
+            if (!window.RTCPeerConnection) missing.push('RTCPeerConnection');
+            if (!window.RTCSessionDescription) missing.push('RTCSessionDescription');
+            if (!window.RTCIceCandidate) missing.push('RTCIceCandidate');
+            
+            return { supported: missing.length === 0, missing };
+        }
+
+        // Display WebRTC support info
+        const support = checkWebRTCSupport();
+        if (!support.supported) {
+            showStatus(`❌ WebRTC not fully supported. Missing: ${support.missing.join(', ')}`, 'error');
+        } else {
+            console.log('✅ WebRTC is fully supported');
+        }
+    </script>
+</body>
+</html>

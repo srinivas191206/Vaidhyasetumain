@@ -1,0 +1,142 @@
+// Firestore Security Rules for Video Calling
+// Copy these rules to your Firebase Console -> Firestore Database -> Rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Notifications Collection
+    match /notifications/{notificationId} {
+      // Users can read their own notifications
+      allow read: if request.auth != null && request.auth.uid == resource.data.toUserId;
+      
+      // Users can create notifications they are sending
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.fromUserId;
+      
+      // Users can update notifications they received (mark as read, accept, reject)
+      allow update: if request.auth != null && request.auth.uid == resource.data.toUserId;
+      
+      // System can update notifications (for status changes)
+      allow update: if request.auth != null && (
+        request.auth.uid == resource.data.fromUserId ||
+        request.auth.uid == resource.data.toUserId
+      );
+    }
+    
+    // Video Calls Collection
+    match /videoCalls/{callId} {
+      // Allow read/write access only to authorized users
+      allow read, write: if isAuthorizedForCall(callId);
+      
+      // ICE Candidates subcollection
+      match /iceCandidates/{userId} {
+        // Only the user who owns the ICE candidates can write
+        // Both participants can read each other's candidates
+        allow read: if isAuthorizedForCall(callId);
+        allow write: if request.auth != null && request.auth.uid == userId;
+      }
+    }
+    
+    // Appointments Collection (assuming this exists)
+    match /appointments/{appointmentId} {
+      // Allow read access to doctor and patient of the appointment
+      allow read: if request.auth != null && 
+        (request.auth.uid == resource.data.doctorId || 
+         request.auth.uid == resource.data.patientId);
+      
+      // Allow write access to doctors and patients (for appointment creation/updates)
+      allow write: if request.auth != null && 
+        (request.auth.uid == resource.data.doctorId || 
+         request.auth.uid == resource.data.patientId ||
+         // Allow creation if user is setting themselves as doctor or patient
+         request.auth.uid == request.resource.data.doctorId || 
+         request.auth.uid == request.resource.data.patientId);
+    }
+    
+    // Patients Collection
+    match /patients/{patientId} {
+      // Patients can read/write their own data
+      // Doctors can read patient data if they have an appointment
+      allow read, write: if request.auth != null && 
+        (request.auth.uid == patientId || 
+         isDoctorWithPatientAccess(patientId));
+    }
+    
+    // Doctors Collection
+    match /doctors/{doctorId} {
+      // Doctors can read/write their own data
+      // Patients can read doctor data if they have an appointment
+      allow read: if request.auth != null;
+      allow write: if request.auth != null && request.auth.uid == doctorId;
+    }
+    
+    // Prescriptions Collection
+    match /prescriptions/{prescriptionId} {
+      // Allow read/write to doctor and patient involved
+      allow read, write: if request.auth != null && 
+        (request.auth.uid == resource.data.doctorId || 
+         request.auth.uid == resource.data.patientId);
+    }
+    
+    // Feedback Collection
+    match /feedback/{feedbackId} {
+      // Allow read/write to the user who created the feedback
+      // Allow read to the doctor or patient mentioned in feedback
+      allow read: if request.auth != null && 
+        (request.auth.uid == resource.data.userId ||
+         request.auth.uid == resource.data.doctorId ||
+         request.auth.uid == resource.data.patientId);
+      allow write: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    // Helper Functions
+    function isAuthorizedForCall(callId) {
+      // Get the video call document
+      let callDoc = get(/databases/$(database)/documents/videoCalls/$(callId));
+      
+      // Check if user is authenticated
+      return request.auth != null && (
+        // User is the doctor in the call
+        request.auth.uid == callDoc.data.doctorId ||
+        // User is the patient in the call
+        request.auth.uid == callDoc.data.patientId ||
+        // For call creation, check if user matches the appointment
+        isAuthorizedForAppointment(callDoc.data.appointmentId)
+      );
+    }
+    
+    function isAuthorizedForAppointment(appointmentId) {
+      // Get the appointment document
+      let appointmentDoc = get(/databases/$(database)/documents/appointments/$(appointmentId));
+      
+      return request.auth != null && (
+        request.auth.uid == appointmentDoc.data.doctorId ||
+        request.auth.uid == appointmentDoc.data.patientId
+      );
+    }
+    
+    function isDoctorWithPatientAccess(patientId) {
+      // Check if the current user (doctor) has any appointments with this patient
+      // This is a simplified version - in practice you might want to check active appointments
+      return exists(/databases/$(database)/documents/appointments/$(request.auth.uid + '_' + patientId)) ||
+             exists(/databases/$(database)/documents/appointments/$(patientId + '_' + request.auth.uid));
+    }
+  }
+}
+
+// Additional rules for Storage (if using Firebase Storage for file uploads)
+// service firebase.storage {
+//   match /b/{bucket}/o {
+//     // Prescription files
+//     match /prescriptions/{appointmentId}/{fileName} {
+//       allow read, write: if request.auth != null && 
+//         isAuthorizedForAppointment(appointmentId);
+//     }
+//     
+//     // Profile pictures
+//     match /profiles/{userId}/{fileName} {
+//       allow read: if request.auth != null;
+//       allow write: if request.auth != null && request.auth.uid == userId;
+//     }
+//   }
+// }
