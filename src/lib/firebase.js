@@ -1,18 +1,19 @@
-// Firebase configuration for telemedicine platform
+// Firebase configuration for Vaidhya Setu telemedicine platform (JavaScript version)
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getAnalytics } from 'firebase/analytics';
 
-// Firebase configuration object using Vite environment variables
+// Firebase configuration object
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+  apiKey: "AIzaSyDIQP3Mgu1BpF4pftSelrDvE8nQSbhXwQ8",
+  authDomain: "hackathon-79e80.firebaseapp.com",
+  projectId: "hackathon-79e80",
+  storageBucket: "hackathon-79e80.firebasestorage.app",
+  messagingSenderId: "338581325054",
+  appId: "1:338581325054:web:10ad1b4e1793d5a7b491af",
+  measurementId: "G-WN45LN4MR6"
 };
 
 // Initialize Firebase
@@ -23,6 +24,12 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// Export services for use across both portals
-export { auth, db, storage };
+// Initialize Analytics (only in browser environment)
+let analytics = null;
+if (typeof window !== 'undefined') {
+  analytics = getAnalytics(app);
+}
+
+// Export services for use across telemedicine platform
+export { auth, db, storage, analytics };
 export default app;
