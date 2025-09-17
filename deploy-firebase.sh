@@ -41,32 +41,19 @@ fi
 
 echo "✅ Build successful! dist folder created."
 
-# Check if Firebase CLI is installed
-if ! command -v firebase &> /dev/null; then
-    echo "🔧 Installing Firebase CLI..."
-    npm install -g firebase-tools
-    
-    if [ $? -ne 0 ]; then
-        echo "❌ Error: Failed to install Firebase CLI"
-        exit 1
-    fi
-else
-    echo "✅ Firebase CLI already installed"
-fi
-
-# Login to Firebase
+# Use npx to avoid global installation issues
 echo "🔐 Checking Firebase authentication..."
-firebase login --no-localhost
+npx firebase-tools login --no-localhost
 
 if [ $? -ne 0 ]; then
     echo "❌ Error: Firebase login failed"
-    echo "Please run 'firebase login' manually and try again"
+    echo "Please run 'npx firebase-tools login' manually and try again"
     exit 1
 fi
 
 # Check if we're using the correct project
 echo "🔍 Setting Firebase project..."
-firebase use hackathon-79e80
+npx firebase-tools use hackathon-79e80
 
 if [ $? -ne 0 ]; then
     echo "⚠️  Warning: Could not set project. Continuing with deployment..."
@@ -74,7 +61,7 @@ fi
 
 # Deploy to Firebase Hosting
 echo "🌐 Deploying to Firebase Hosting..."
-firebase deploy --only hosting
+npx firebase-tools deploy --only hosting
 
 if [ $? -eq 0 ]; then
     echo ""
@@ -117,11 +104,11 @@ else
     echo "=================="
     echo ""
     echo "🔧 Troubleshooting steps:"
-    echo "   1. Check if you're logged into Firebase: firebase login"
-    echo "   2. Verify project access: firebase projects:list"
+    echo "   1. Check if you're logged into Firebase: npx firebase-tools login"
+    echo "   2. Verify project access: npx firebase-tools projects:list"
     echo "   3. Check build output: npm run build"
     echo "   4. Verify dist folder exists and has content"
-    echo "   5. Try manual deployment: firebase deploy --only hosting"
+    echo "   5. Try manual deployment: npx firebase-tools deploy --only hosting"
     echo ""
     exit 1
 fi
