@@ -1,4 +1,6 @@
-// Patient and Appointment Management Functions
+// Patient and Appointment Management Functions (Mock Implementation)
+// This replaces the actual Firestore operations with mock implementations
+
 import { 
   addDoc, 
   serverTimestamp, 
@@ -8,7 +10,7 @@ import {
   updateDoc,
   doc,
   getDoc
-} from 'firebase/firestore';
+} from '@/lib/firebase';
 import { 
   patientsCollection, 
   appointmentsCollection, 
@@ -18,7 +20,7 @@ import {
 } from './firestore-collections';
 
 /**
- * Add a new patient from Health Center
+ * Add a new patient from Health Center (Mock Implementation)
  * @param patientData - Patient information
  * @param healthCenterId - ID of the health center
  * @returns Promise with patient ID
@@ -35,17 +37,22 @@ export const addNewPatient = async (
       updatedAt: serverTimestamp(),
     };
 
-    const docRef = await addDoc(patientsCollection, newPatient);
-    console.log('Patient added successfully with ID:', docRef.id);
-    return docRef.id;
+    console.log('Mock: Adding patient with data:', newPatient);
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Return a mock patient ID
+    const patientId = `mock-patient-${Date.now()}`;
+    console.log('Mock: Patient added successfully with ID:', patientId);
+    return patientId;
   } catch (error) {
-    console.error('Error adding patient:', error);
-    throw new Error('Failed to add patient');
+    console.error('Mock: Error adding patient:', error);
+    throw new Error('Failed to add patient: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 };
 
 /**
- * Create a new appointment
+ * Create a new appointment (Mock Implementation)
  * @param appointmentData - Appointment details
  * @returns Promise with appointment ID
  */
@@ -63,18 +70,23 @@ export const createAppointment = async (
       updatedAt: serverTimestamp(),
     };
 
-    const docRef = await addDoc(appointmentsCollection, newAppointment);
-    console.log('Appointment created successfully with ID:', docRef.id);
-    console.log('Video Room ID:', videoRoomId);
-    return docRef.id;
+    console.log('Mock: Creating appointment with data:', newAppointment);
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Return a mock appointment ID
+    const appointmentId = `mock-appointment-${Date.now()}`;
+    console.log('Mock: Appointment created successfully with ID:', appointmentId);
+    console.log('Mock: Video Room ID:', videoRoomId);
+    return appointmentId;
   } catch (error) {
-    console.error('Error creating appointment:', error);
-    throw new Error('Failed to create appointment');
+    console.error('Mock: Error creating appointment:', error);
+    throw new Error('Failed to create appointment: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 };
 
 /**
- * Add patient and create appointment in one operation (for Health Center workflow)
+ * Add patient and create appointment in one operation (Mock Implementation)
  * @param patientData - Patient information
  * @param appointmentData - Appointment details
  * @param healthCenterId - Health center ID
@@ -86,8 +98,11 @@ export const addPatientAndAppointment = async (
   healthCenterId: string
 ): Promise<{ patientId: string; appointmentId: string; videoRoomId: string }> => {
   try {
+    console.log('Mock: Starting addPatientAndAppointment with:', { patientData, appointmentData, healthCenterId });
+    
     // Add patient first
     const patientId = await addNewPatient(patientData, healthCenterId);
+    console.log('Mock: Patient created with ID:', patientId);
 
     // Create appointment with the new patient ID
     const appointmentId = await createAppointment({
@@ -95,24 +110,30 @@ export const addPatientAndAppointment = async (
       healthCenterId,
       ...appointmentData,
     });
+    console.log('Mock: Appointment created with ID:', appointmentId);
 
-    // Get the video room ID from the created appointment
-    const appointmentDoc = await getDoc(doc(appointmentsCollection, appointmentId));
-    const appointment = appointmentDoc.data() as Appointment;
+    // Generate a mock video room ID
+    const videoRoomId = generateVideoRoomId();
+    console.log('Mock: Video Room ID:', videoRoomId);
 
     return {
       patientId,
       appointmentId,
-      videoRoomId: appointment.videoRoomId,
+      videoRoomId,
     };
   } catch (error) {
-    console.error('Error in addPatientAndAppointment:', error);
-    throw new Error('Failed to add patient and create appointment');
+    console.error('Mock: Error in addPatientAndAppointment:', error);
+    // Provide more specific error information
+    if (error instanceof Error) {
+      throw new Error(`Failed to add patient and create appointment: ${error.message}`);
+    } else {
+      throw new Error('Failed to add patient and create appointment due to unknown error');
+    }
   }
 };
 
 /**
- * Listen to real-time appointments for a specific doctor
+ * Listen to real-time appointments for a specific doctor (Mock Implementation)
  * @param doctorId - Doctor's ID
  * @param callback - Function to handle appointment updates
  * @returns Unsubscribe function
@@ -121,39 +142,36 @@ export const listenToDoctorAppointments = (
   doctorId: string,
   callback: (appointments: Appointment[]) => void
 ) => {
-  const q = query(
-    appointmentsCollection,
-    where('doctorId', '==', doctorId),
-    where('status', 'in', ['scheduled', 'in-progress'])
-  );
-
-  const unsubscribe = onSnapshot(
-    q,
-    (querySnapshot) => {
-      const appointments: Appointment[] = [];
-      querySnapshot.forEach((doc) => {
-        appointments.push({
-          id: doc.id,
-          ...doc.data(),
-        } as Appointment);
-      });
-      
-      // Sort by appointment time
-      appointments.sort((a, b) => a.time.seconds - b.time.seconds);
-      
-      console.log('Real-time appointments update for doctor:', doctorId);
-      callback(appointments);
-    },
-    (error) => {
-      console.error('Error listening to appointments:', error);
+  console.log('Mock: Setting up listener for doctor appointments', doctorId);
+  
+  // Simulate real-time updates with mock data
+  const mockAppointments: Appointment[] = [
+    {
+      id: 'mock-apt-1',
+      patientId: 'mock-patient-1',
+      doctorId: doctorId,
+      healthCenterId: 'mock-health-center-1',
+      time: Timestamp.fromDate(new Date(Date.now() + 3600000)), // 1 hour from now
+      status: 'scheduled',
+      videoRoomId: 'mock-room-1',
+      symptoms: 'Fever and cough',
+      urgency: 'normal',
+      createdAt: Timestamp.fromDate(new Date()),
+      updatedAt: Timestamp.fromDate(new Date()),
+      notes: 'Patient reports fever for 3 days'
     }
-  );
-
-  return unsubscribe;
+  ];
+  
+  callback(mockAppointments);
+  
+  // Return unsubscribe function
+  return () => {
+    console.log('Mock: Unsubscribed from doctor appointments listener');
+  };
 };
 
 /**
- * Update appointment status
+ * Update appointment status (Mock Implementation)
  * @param appointmentId - Appointment ID
  * @param status - New status
  */
@@ -162,19 +180,18 @@ export const updateAppointmentStatus = async (
   status: Appointment['status']
 ): Promise<void> => {
   try {
-    await updateDoc(doc(appointmentsCollection, appointmentId), {
-      status,
-      updatedAt: serverTimestamp(),
-    });
-    console.log(`Appointment ${appointmentId} status updated to ${status}`);
+    console.log(`Mock: Updating appointment ${appointmentId} status to ${status}`);
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    console.log(`Mock: Appointment ${appointmentId} status updated to ${status}`);
   } catch (error) {
-    console.error('Error updating appointment status:', error);
-    throw new Error('Failed to update appointment status');
+    console.error('Mock: Error updating appointment status:', error);
+    throw new Error('Failed to update appointment status: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 };
 
 /**
- * Get appointments for a health center
+ * Get appointments for a health center (Mock Implementation)
  * @param healthCenterId - Health center ID
  * @param callback - Function to handle appointments update
  * @returns Unsubscribe function
@@ -183,29 +200,30 @@ export const listenToHealthCenterAppointments = (
   healthCenterId: string,
   callback: (appointments: Appointment[]) => void
 ) => {
-  const q = query(
-    appointmentsCollection,
-    where('healthCenterId', '==', healthCenterId)
-  );
-
-  const unsubscribe = onSnapshot(
-    q,
-    (querySnapshot) => {
-      const appointments: Appointment[] = [];
-      querySnapshot.forEach((doc) => {
-        appointments.push({
-          id: doc.id,
-          ...doc.data(),
-        } as Appointment);
-      });
-      
-      console.log('Real-time appointments update for health center:', healthCenterId);
-      callback(appointments);
-    },
-    (error) => {
-      console.error('Error listening to health center appointments:', error);
+  console.log('Mock: Setting up listener for health center appointments', healthCenterId);
+  
+  // Simulate real-time updates with mock data
+  const mockAppointments: Appointment[] = [
+    {
+      id: 'mock-apt-2',
+      patientId: 'mock-patient-2',
+      doctorId: 'mock-doctor-1',
+      healthCenterId: healthCenterId,
+      time: Timestamp.fromDate(new Date(Date.now() + 7200000)), // 2 hours from now
+      status: 'scheduled',
+      videoRoomId: 'mock-room-2',
+      symptoms: 'Headache and dizziness',
+      urgency: 'urgent',
+      createdAt: Timestamp.fromDate(new Date()),
+      updatedAt: Timestamp.fromDate(new Date()),
+      notes: 'Patient reports severe headache'
     }
-  );
-
-  return unsubscribe;
+  ];
+  
+  callback(mockAppointments);
+  
+  // Return unsubscribe function
+  return () => {
+    console.log('Mock: Unsubscribed from health center appointments listener');
+  };
 };

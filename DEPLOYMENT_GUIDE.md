@@ -204,6 +204,9 @@ firebase deploy
 ```
 
 **2. Vercel**
+
+For Vercel deployment, please refer to the dedicated [Vercel Deployment Guide](VERCEL_DEPLOYMENT_GUIDE.md) which explains how to properly configure environment variables and avoid common deployment issues like the "Secret does not exist" error.
+
 ```bash
 npm install -g vercel
 vercel --prod

@@ -1,150 +1,90 @@
-// Push Notification Service for Vaidhya Setu Telemedicine Platform
-import { messaging } from './firebase';
-import { getToken, onMessage, isSupported } from 'firebase/messaging';
+// Mock Push Notification Service for Firebase Messaging
+// This replaces the actual Firebase Messaging implementation with mock functionality
 
 /**
- * Request permission for push notifications
- * @returns {Promise<boolean>} Whether permission was granted
+ * Initialize push notifications for the telemedicine platform (Mock Implementation)
  */
-export async function requestPushNotificationPermission(): Promise<boolean> {
-  if (!await isSupported()) {
-    console.warn('Firebase Messaging is not supported in this browser');
-    return false;
-  }
-
-  if (!messaging) {
-    console.warn('Firebase Messaging is not initialized');
-    return false;
-  }
-
+export const initializePushNotifications = async (): Promise<void> => {
   try {
-    const permission = await Notification.requestPermission();
-    if (permission === 'granted') {
-      console.log('Notification permission granted');
-      return true;
-    } else {
-      console.log('Unable to get permission to notify');
-      return false;
-    }
-  } catch (error) {
-    console.error('Error requesting notification permission:', error);
-    return false;
-  }
-}
-
-/**
- * Get Firebase Messaging token for push notifications
- * @returns {Promise<string|null>} The FCM token or null if not available
- */
-export async function getMessagingToken(): Promise<string | null> {
-  if (!await isSupported()) {
-    console.warn('Firebase Messaging is not supported in this browser');
-    return null;
-  }
-
-  if (!messaging) {
-    console.warn('Firebase Messaging is not initialized');
-    return null;
-  }
-
-  try {
-    // Get registration token
-    const currentToken = await getToken(messaging, { 
-      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY 
-    });
+    console.log('Mock: Initializing push notifications');
     
-    if (currentToken) {
-      console.log('Current token for client:', currentToken);
-      return currentToken;
+    // Simulate checking if Firebase Messaging is supported
+    const isSupported = true;
+    if (!isSupported) {
+      console.warn('Mock: Firebase Messaging is not supported in this browser');
+      return;
+    }
+    
+    // Simulate getting FCM token
+    const token = 'mock-fcm-token';
+    console.log('Mock: Got FCM token:', token);
+    
+    // Store token in localStorage for demo purposes
+    localStorage.setItem('fcmToken', token);
+    
+    console.log('Mock: Push notifications initialized successfully');
+  } catch (error) {
+    console.error('Mock: Error initializing push notifications:', error);
+  }
+};
+
+/**
+ * Request notification permission from user (Mock Implementation)
+ */
+export const requestNotificationPermission = async (): Promise<NotificationPermission> => {
+  try {
+    console.log('Mock: Requesting notification permission');
+    
+    // Simulate requesting permission
+    const permission: NotificationPermission = 'granted';
+    console.log('Mock: Notification permission:', permission);
+    
+    return permission;
+  } catch (error) {
+    console.error('Mock: Error requesting notification permission:', error);
+    return 'denied';
+  }
+};
+
+/**
+ * Show a notification to the user (Mock Implementation)
+ */
+export const showNotification = async (title: string, options?: NotificationOptions): Promise<void> => {
+  try {
+    console.log('Mock: Showing notification:', title, options);
+    
+    // Simulate showing notification
+    if (Notification.permission === 'granted') {
+      // In a real implementation, this would show an actual notification
+      console.log('Mock: Notification would be shown to user');
     } else {
-      console.log('No registration token available. Request permission to generate one.');
-      return null;
+      console.warn('Mock: Notification permission not granted');
     }
   } catch (error) {
-    console.error('An error occurred while retrieving token:', error);
-    return null;
+    console.error('Mock: Error showing notification:', error);
   }
-}
+};
 
 /**
- * Listen for foreground messages
- * @param {Function} callback Function to handle received messages
+ * Handle incoming foreground messages (Mock Implementation)
  */
-export function onForegroundMessage(callback: (payload: any) => void): void {
-  if (!messaging) {
-    console.warn('Firebase Messaging is not initialized');
-    return;
-  }
-
-  onMessage(messaging, (payload) => {
-    console.log('Message received in foreground:', payload);
-    callback(payload);
-  });
-}
-
-/**
- * Show a notification using the browser's Notification API
- * @param {string} title Notification title
- * @param {string} body Notification body
- * @param {Object} data Additional data
- */
-export function showLocalNotification(title: string, body: string, data: Record<string, any> = {}): void {
-  if (!('Notification' in window)) {
-    console.warn('This browser does not support desktop notification');
-    return;
-  }
-
-  if (Notification.permission === 'granted') {
-    const notification = new Notification(title, {
-      body: body,
-      icon: '/vaidhya-setu-logo.png',
-      data: data
-    });
-
-    notification.onclick = function(event) {
-      event.preventDefault();
-      window.focus();
-      notification.close();
-      
-      // Handle notification click action if provided
-      if (data.click_action) {
-        window.open(data.click_action, '_blank');
+export const onForegroundMessage = (callback: (payload: any) => void): void => {
+  console.log('Mock: Setting up foreground message handler');
+  
+  // Simulate receiving a message after a delay
+  setTimeout(() => {
+    const mockPayload = {
+      notification: {
+        title: 'Mock Notification',
+        body: 'This is a mock notification message'
+      },
+      data: {
+        url: '/dashboard'
       }
     };
-  }
-}
-
-/**
- * Initialize push notifications
- * @returns {Promise<void>}
- */
-export async function initializePushNotifications(): Promise<void> {
-  if (!await isSupported()) {
-    console.warn('Firebase Messaging is not supported in this browser');
-    return;
-  }
-
-  const hasPermission = await requestPushNotificationPermission();
-  if (hasPermission) {
-    const token = await getMessagingToken();
-    if (token) {
-      // In a real application, you would send this token to your server
-      console.log('FCM Token:', token);
-      
-      // Listen for foreground messages
-      onForegroundMessage((payload) => {
-        console.log('Foreground message received:', payload);
-        
-        // Show local notification for foreground messages
-        showLocalNotification(
-          payload.notification?.title || 'Vaidhya Setu Notification',
-          payload.notification?.body || 'You have a new notification',
-          payload.data
-        );
-      });
-    }
-  }
-}
-
-// Export types
-export type { Messaging };
+    
+    callback(mockPayload);
+  }, 5000);
+  
+  console.log('Mock: Foreground message handler set up');
+};

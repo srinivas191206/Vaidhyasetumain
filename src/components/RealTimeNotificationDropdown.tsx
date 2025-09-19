@@ -23,6 +23,7 @@ import {
   markNotificationAsRead,
   type Notification
 } from "@/lib/notification-service";
+import { generateCallId } from "@/lib/webrtc-video-call";
 
 interface RealTimeNotificationDropdownProps {
   userId: string;
@@ -47,6 +48,7 @@ const RealTimeNotificationDropdown: React.FC<RealTimeNotificationDropdownProps> 
     appointmentId: string;
     patientName: string;
   } | null>(null);
+  const [videoCallNotification, setVideoCallNotification] = useState<Notification | null>(null);
 
   // Listen to notifications
   useEffect(() => {
@@ -74,6 +76,20 @@ const RealTimeNotificationDropdown: React.FC<RealTimeNotificationDropdownProps> 
       if (notification.type === 'appointment_request' && userRole === 'doctor') {
         setSelectedRequest(notification);
         setIsRequestDialogOpen(true);
+      } else if (notification.type === 'consultation_started' || 
+                 notification.type === 'video_call_invitation') {
+        // Handle video call notification
+        setVideoCallNotification(notification);
+        await markNotificationAsRead(notification.id!);
+        
+        // Auto-open video call if it's for this user
+        if (notification.data?.action === 'join_call' && notification.appointmentId) {
+          setAcceptedAppointment({
+            appointmentId: notification.appointmentId,
+            patientName: notification.data?.patientName || 'Patient'
+          });
+          setIsVideoCallOpen(true);
+        }
       } else {
         await markNotificationAsRead(notification.id!);
       }

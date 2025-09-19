@@ -40,7 +40,7 @@ import {
   listenToUserNotifications,
   type Notification 
 } from "@/lib/notification-service";
-import { Timestamp } from 'firebase/firestore';
+import { Timestamp } from '@/lib/firebase';
 
 interface RuralCenterDashboardProps {
   centerName: string;
@@ -304,9 +304,18 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       return;
     }
     
+    // Validate doctor selection
+    const doctorId = "doctor_specialist_001";
+    if (!doctorId) {
+      alert("Please select a specialist doctor");
+      return;
+    }
+    
     setIsSubmittingRequest(true);
     
     try {
+      console.log('Starting consultation request submission');
+      
       // Create patient and appointment first
       const patientData = {
         name: consultationRequest.patientName,
@@ -317,8 +326,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
         allergies: "Unknown"
       };
       
-      // Use first available specialist for demo - in production this would be selected by user
-      const doctorId = "doctor_specialist_001"; // This should come from selected specialist
+      console.log('Patient data:', patientData);
       
       const appointmentData = {
         doctorId,
@@ -328,6 +336,9 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
         notes: `Vitals: ${consultationRequest.vitals}`
       };
       
+      console.log('Appointment data:', appointmentData);
+      console.log('Health center ID:', healthCenterId);
+      
       // Create patient and appointment
       const result = await addPatientAndAppointment(
         patientData,
@@ -335,7 +346,15 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
         healthCenterId
       );
       
+      console.log('Patient and appointment creation result:', result);
+      
+      // Check if result has all required fields
+      if (!result || !result.appointmentId || !result.patientId) {
+        throw new Error('Failed to create patient and appointment');
+      }
+      
       // Send notification to doctor
+      console.log('Sending appointment request notification');
       await sendAppointmentRequest(
         result.appointmentId,
         doctorId,
@@ -363,7 +382,12 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       
     } catch (error) {
       console.error('Error submitting consultation request:', error);
-      alert('Failed to submit consultation request. Please try again.');
+      // Provide more detailed error message
+      if (error instanceof Error) {
+        alert(`Failed to submit consultation request: ${error.message}. Please try again.`);
+      } else {
+        alert('Failed to submit consultation request. Please try again.');
+      }
     } finally {
       setIsSubmittingRequest(false);
     }

@@ -1,4 +1,6 @@
-// Firestore Collections and Data Models
+// Mock Firestore Collections and Data Models
+// This replaces the actual Firestore collections with mock implementations
+
 import { 
   collection, 
   doc, 
@@ -14,11 +16,9 @@ import {
   serverTimestamp,
   increment,
   Timestamp
-} from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage } from '@/lib/firebase';
+} from '@/lib/firebase';
 
-// Type definitions for our collections
+// Type definitions for our collections (keeping the same structure)
 export interface Patient {
   id?: string;
   name: string;
@@ -99,13 +99,13 @@ export interface HealthCenter {
   createdAt: Timestamp;
 }
 
-// Collection references
-export const patientsCollection = collection(db, 'patients');
-export const appointmentsCollection = collection(db, 'appointments');
-export const prescriptionsCollection = collection(db, 'prescriptions');
-export const feedbackCollection = collection(db, 'feedback');
-export const doctorsCollection = collection(db, 'doctors');
-export const healthCentersCollection = collection(db, 'healthCenters');
+// Mock Collection references (using the mock collection function)
+export const patientsCollection = collection({} as any, 'patients');
+export const appointmentsCollection = collection({} as any, 'appointments');
+export const prescriptionsCollection = collection({} as any, 'prescriptions');
+export const feedbackCollection = collection({} as any, 'feedback');
+export const doctorsCollection = collection({} as any, 'doctors');
+export const healthCentersCollection = collection({} as any, 'healthCenters');
 
 // Utility function to generate video room ID
 export const generateVideoRoomId = (): string => {

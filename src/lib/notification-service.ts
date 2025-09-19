@@ -1,4 +1,6 @@
-// Real-time Notification Service for Doctor-Patient Sync
+// Real-time Notification Service for Doctor-Patient Sync (Mock Implementation)
+// This replaces the actual Firestore operations with mock implementations
+
 import { 
   addDoc, 
   serverTimestamp, 
@@ -13,10 +15,19 @@ import {
   orderBy,
   limit,
   Timestamp,
-  FieldValue
-} from 'firebase/firestore';
-import { db, messaging } from '@/lib/firebase';
-import { isSupported, getToken } from 'firebase/messaging';
+  type FieldValue
+} from '@/lib/firebase';
+
+// Mock implementation of Firebase Messaging functions
+const isSupported = async () => {
+  console.log('Mock: Checking if Firebase Messaging is supported');
+  return true; // Always return true for mock
+};
+
+const getToken = async () => {
+  console.log('Mock: Getting Firebase Messaging token');
+  return 'mock-messaging-token'; // Return a mock token
+};
 
 // Notification types
 export type NotificationType = 
@@ -27,7 +38,10 @@ export type NotificationType =
   | 'consultation_completed'
   | 'prescription_ready'
   | 'feedback_request'
-  | 'emergency_alert';
+  | 'emergency_alert'
+  | 'video_call_invitation'
+  | 'video_call_accepted'
+  | 'video_call_ended';
 
 export interface Notification {
   id?: string;
@@ -51,39 +65,27 @@ export interface Notification {
   expiresAt?: Timestamp; // For time-sensitive notifications
 }
 
-// Firestore collections
-const notificationsCollection = collection(db, 'notifications');
+// Mock Firestore collections
+const notificationsCollection = collection({} as any, 'notifications');
 
 /**
- * Send a push notification using Firebase Messaging
+ * Send a push notification using Firebase Messaging (Mock Implementation)
  */
 async function sendPushNotification(notification: Omit<Notification, 'id'>): Promise<void> {
   // Only send push notifications in browser environment
-  if (typeof window === 'undefined' || !messaging) {
+  if (typeof window === 'undefined') {
     return;
   }
 
   try {
-    // Check if Firebase Messaging is supported
-    if (!(await isSupported())) {
-      console.warn('Firebase Messaging is not supported in this browser');
-      return;
-    }
-
-    // In a real application, you would send this to your server
-    // which would then use the FCM HTTP API to send the push notification
-    console.log('Would send push notification:', notification.title, notification.message);
-    
-    // For demonstration purposes, we're just logging
-    // In a real implementation, this would make an API call to your backend
-    // which would then send the push notification via FCM
+    console.log('Mock: Would send push notification:', notification.title, notification.message);
   } catch (error) {
-    console.error('Error sending push notification:', error);
+    console.error('Mock: Error sending push notification:', error);
   }
 }
 
 /**
- * Send a notification to a user
+ * Send a notification to a user (Mock Implementation)
  */
 export const sendNotification = async (
   notificationData: Omit<Notification, 'id' | 'createdAt' | 'updatedAt' | 'status'>
@@ -96,21 +98,26 @@ export const sendNotification = async (
       updatedAt: serverTimestamp(),
     };
 
-    const docRef = await addDoc(notificationsCollection, notification);
-    console.log('Notification sent:', docRef.id);
+    console.log('Mock: Sending notification:', notification);
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Return a mock notification ID
+    const notificationId = `mock-notification-${Date.now()}`;
+    console.log('Mock: Notification sent:', notificationId);
     
     // Send push notification
     await sendPushNotification(notification);
     
-    return docRef.id;
+    return notificationId;
   } catch (error) {
-    console.error('Error sending notification:', error);
-    throw new Error('Failed to send notification');
+    console.error('Mock: Error sending notification:', error);
+    throw new Error('Failed to send notification: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 };
 
 /**
- * Send appointment request notification from patient/health center to doctor
+ * Send appointment request notification from patient/health center to doctor (Mock Implementation)
  */
 export const sendAppointmentRequest = async (
   appointmentId: string,
@@ -161,7 +168,7 @@ export const sendAppointmentRequest = async (
 };
 
 /**
- * Doctor accepts appointment request
+ * Doctor accepts appointment request (Mock Implementation)
  */
 export const acceptAppointmentRequest = async (
   notificationId: string,
@@ -171,58 +178,50 @@ export const acceptAppointmentRequest = async (
   acceptanceMessage?: string
 ): Promise<void> => {
   try {
-    // Update the original notification
-    await updateDoc(doc(notificationsCollection, notificationId), {
-      status: 'accepted',
-      updatedAt: serverTimestamp(),
-      data: {
-        acceptanceMessage: acceptanceMessage || 'Appointment accepted by doctor',
-        acceptedAt: new Date().toISOString()
-      }
-    });
-
-    // Get the original notification to send response
-    const originalNotification = await getDoc(doc(notificationsCollection, notificationId));
-    const notificationData = originalNotification.data() as Notification;
-
-    // Send acceptance notification back to health center and patient
+    console.log('Mock: Accepting appointment request', notificationId, appointmentId);
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Simulate updating the original notification
+    console.log('Mock: Updating original notification status to accepted');
+    
+    // Simulate sending acceptance notification back to health center
     const acceptanceNotification: Omit<Notification, 'id' | 'createdAt' | 'updatedAt' | 'status'> = {
       type: 'appointment_accepted',
       title: 'Consultation Accepted',
-      message: `Dr. ${doctorName} has accepted the consultation request for ${notificationData.data?.patientName}. ${acceptanceMessage || 'Please prepare the patient for the video consultation.'}`,
+      message: `Dr. ${doctorName} has accepted the consultation request. ${acceptanceMessage || 'Please prepare the patient for the video consultation.'}`,
       fromUserId: doctorId,
       fromUserName: doctorName,
       fromUserRole: 'doctor',
-      toUserId: notificationData.fromUserId,
+      toUserId: 'mock-health-center-id',
       toUserRole: 'health_center',
       appointmentId,
-      patientId: notificationData.patientId,
+      patientId: 'mock-patient-id',
       doctorId,
-      healthCenterId: notificationData.healthCenterId,
+      healthCenterId: 'mock-health-center-id',
       priority: 'normal',
       data: {
         originalNotificationId: notificationId,
         acceptanceMessage,
         doctorName,
-        patientName: notificationData.data?.patientName
+        patientName: 'Mock Patient'
       }
     };
 
     await sendNotification(acceptanceNotification);
-
-    // Update appointment status
-    const { updateAppointmentStatus } = await import('./patient-appointment-service');
-    await updateAppointmentStatus(appointmentId, 'scheduled');
-
-    console.log('Appointment request accepted:', appointmentId);
+    
+    // Simulate updating appointment status
+    console.log('Mock: Updating appointment status to scheduled');
+    
+    console.log('Mock: Appointment request accepted:', appointmentId);
   } catch (error) {
-    console.error('Error accepting appointment:', error);
-    throw new Error('Failed to accept appointment');
+    console.error('Mock: Error accepting appointment:', error);
+    throw new Error('Failed to accept appointment: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 };
 
 /**
- * Doctor rejects appointment request
+ * Doctor rejects appointment request (Mock Implementation)
  */
 export const rejectAppointmentRequest = async (
   notificationId: string,
@@ -232,150 +231,157 @@ export const rejectAppointmentRequest = async (
   rejectionReason: string
 ): Promise<void> => {
   try {
-    // Update the original notification
-    await updateDoc(doc(notificationsCollection, notificationId), {
-      status: 'rejected',
-      updatedAt: serverTimestamp(),
-      data: {
-        rejectionReason,
-        rejectedAt: new Date().toISOString()
-      }
-    });
-
-    // Get the original notification to send response
-    const originalNotification = await getDoc(doc(notificationsCollection, notificationId));
-    const notificationData = originalNotification.data() as Notification;
-
-    // Send rejection notification back to health center
+    console.log('Mock: Rejecting appointment request', notificationId, appointmentId);
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // Simulate updating the original notification
+    console.log('Mock: Updating original notification status to rejected');
+    
+    // Simulate sending rejection notification back to health center
     const rejectionNotification: Omit<Notification, 'id' | 'createdAt' | 'updatedAt' | 'status'> = {
       type: 'appointment_rejected',
       title: 'Consultation Request Declined',
-      message: `Dr. ${doctorName} is unable to accept the consultation request for ${notificationData.data?.patientName}. Reason: ${rejectionReason}`,
+      message: `Dr. ${doctorName} is unable to accept the consultation request. Reason: ${rejectionReason}`,
       fromUserId: doctorId,
       fromUserName: doctorName,
       fromUserRole: 'doctor',
-      toUserId: notificationData.fromUserId,
+      toUserId: 'mock-health-center-id',
       toUserRole: 'health_center',
       appointmentId,
-      patientId: notificationData.patientId,
+      patientId: 'mock-patient-id',
       doctorId,
-      healthCenterId: notificationData.healthCenterId,
+      healthCenterId: 'mock-health-center-id',
       priority: 'normal',
       data: {
         originalNotificationId: notificationId,
         rejectionReason,
         doctorName,
-        patientName: notificationData.data?.patientName
+        patientName: 'Mock Patient'
       }
     };
 
     await sendNotification(rejectionNotification);
-
-    // Update appointment status
-    const { updateAppointmentStatus } = await import('./patient-appointment-service');
-    await updateAppointmentStatus(appointmentId, 'cancelled');
-
-    console.log('Appointment request rejected:', appointmentId);
+    
+    // Simulate updating appointment status
+    console.log('Mock: Updating appointment status to cancelled');
+    
+    console.log('Mock: Appointment request rejected:', appointmentId);
   } catch (error) {
-    console.error('Error rejecting appointment:', error);
-    throw new Error('Failed to reject appointment');
+    console.error('Mock: Error rejecting appointment:', error);
+    throw new Error('Failed to reject appointment: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 };
 
 /**
- * Listen to real-time notifications for a user
+ * Listen to real-time notifications for a user (Mock Implementation)
  */
 export const listenToUserNotifications = (
   userId: string,
   callback: (notifications: Notification[]) => void
 ): (() => void) => {
-  const q = query(
-    notificationsCollection,
-    where('toUserId', '==', userId),
-    orderBy('createdAt', 'desc'),
-    limit(50)
-  );
-
-  const unsubscribe = onSnapshot(
-    q,
-    (querySnapshot) => {
-      const notifications: Notification[] = [];
-      querySnapshot.forEach((doc) => {
-        notifications.push({
-          id: doc.id,
-          ...doc.data(),
-        } as Notification);
-      });
-      
-      console.log('Real-time notifications update for user:', userId);
-      callback(notifications);
-    },
-    (error) => {
-      console.error('Error listening to notifications:', error);
+  console.log('Mock: Setting up listener for user notifications', userId);
+  
+  // Simulate real-time updates with mock data
+  const mockNotifications: Notification[] = [
+    {
+      id: 'mock-notification-1',
+      type: 'appointment_request',
+      title: 'New Consultation Request',
+      message: 'Rural Health Center requests urgent consultation for patient John Doe',
+      fromUserId: 'mock-health-center-id',
+      fromUserName: 'Rural Health Center',
+      fromUserRole: 'health_center',
+      toUserId: userId,
+      toUserRole: 'doctor',
+      appointmentId: 'mock-appointment-id',
+      patientId: 'mock-patient-id',
+      doctorId: userId,
+      healthCenterId: 'mock-health-center-id',
+      status: 'pending',
+      priority: 'urgent',
+      data: {
+        patientName: 'John Doe',
+        symptoms: 'High fever and cough',
+        requestedTime: new Date().toISOString(),
+        healthCenterName: 'Rural Health Center'
+      },
+      createdAt: Timestamp.fromDate(new Date()),
+      updatedAt: Timestamp.fromDate(new Date())
     }
-  );
-
-  return unsubscribe;
+  ];
+  
+  callback(mockNotifications);
+  
+  // Return unsubscribe function
+  return () => {
+    console.log('Mock: Unsubscribed from user notifications listener');
+  };
 };
 
 /**
- * Listen to pending appointment requests for a doctor
+ * Listen to pending appointment requests for a doctor (Mock Implementation)
  */
 export const listenToDoctorAppointmentRequests = (
   doctorId: string,
   callback: (requests: Notification[]) => void
 ): (() => void) => {
-  const q = query(
-    notificationsCollection,
-    where('toUserId', '==', doctorId),
-    where('type', '==', 'appointment_request'),
-    where('status', '==', 'pending'),
-    orderBy('createdAt', 'desc')
-  );
-
-  const unsubscribe = onSnapshot(
-    q,
-    (querySnapshot) => {
-      const requests: Notification[] = [];
-      querySnapshot.forEach((doc) => {
-        const data = doc.data() as Notification;
-        // Check if notification hasn't expired
-        if (!data.expiresAt || data.expiresAt.toDate() > new Date()) {
-          requests.push({
-            id: doc.id,
-            ...data,
-          });
-        }
-      });
-      
-      console.log('Real-time appointment requests for doctor:', doctorId, requests.length);
-      callback(requests);
-    },
-    (error) => {
-      console.error('Error listening to appointment requests:', error);
+  console.log('Mock: Setting up listener for doctor appointment requests', doctorId);
+  
+  // Simulate real-time updates with mock data
+  const mockRequests: Notification[] = [
+    {
+      id: 'mock-request-1',
+      type: 'appointment_request',
+      title: 'Urgent Consultation Request',
+      message: 'Rural Health Center requests urgent consultation for patient Jane Smith',
+      fromUserId: 'mock-health-center-id',
+      fromUserName: 'Rural Health Center',
+      fromUserRole: 'health_center',
+      toUserId: doctorId,
+      toUserRole: 'doctor',
+      appointmentId: 'mock-appointment-id-2',
+      patientId: 'mock-patient-id-2',
+      doctorId: doctorId,
+      healthCenterId: 'mock-health-center-id',
+      status: 'pending',
+      priority: 'urgent',
+      data: {
+        patientName: 'Jane Smith',
+        symptoms: 'Severe headache and dizziness',
+        requestedTime: new Date().toISOString(),
+        healthCenterName: 'Rural Health Center'
+      },
+      createdAt: Timestamp.fromDate(new Date()),
+      updatedAt: Timestamp.fromDate(new Date())
     }
-  );
-
-  return unsubscribe;
+  ];
+  
+  callback(mockRequests);
+  
+  // Return unsubscribe function
+  return () => {
+    console.log('Mock: Unsubscribed from doctor appointment requests listener');
+  };
 };
 
 /**
- * Mark notification as read
+ * Mark notification as read (Mock Implementation)
  */
 export const markNotificationAsRead = async (notificationId: string): Promise<void> => {
   try {
-    await updateDoc(doc(notificationsCollection, notificationId), {
-      status: 'read',
-      updatedAt: serverTimestamp(),
-    });
+    console.log('Mock: Marking notification as read', notificationId);
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 200));
+    console.log('Mock: Notification marked as read');
   } catch (error) {
-    console.error('Error marking notification as read:', error);
-    throw new Error('Failed to mark notification as read');
+    console.error('Mock: Error marking notification as read:', error);
+    throw new Error('Failed to mark notification as read: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 };
 
 /**
- * Send consultation started notification
+ * Send consultation started notification (Mock Implementation)
  */
 export const sendConsultationStartedNotification = async (
   appointmentId: string,
@@ -410,41 +416,76 @@ export const sendConsultationStartedNotification = async (
 };
 
 /**
- * Get notification counts for a user
+ * Get notification counts for a user (Mock Implementation)
  */
 export const getNotificationCounts = async (userId: string) => {
   try {
-    const q = query(
-      notificationsCollection,
-      where('toUserId', '==', userId)
-    );
-
-    const querySnapshot = await getDocs(q);
-    let unreadCount = 0;
-    let pendingCount = 0;
-    let totalCount = querySnapshot.size;
-
-    querySnapshot.forEach((doc) => {
-      const data = doc.data() as Notification;
-      if (data.status === 'pending') {
-        unreadCount++;
-        pendingCount++;
-      } else if (data.status === 'read') {
-        // Already read
-      } else {
-        unreadCount++;
-      }
-    });
-
+    console.log('Mock: Getting notification counts for user', userId);
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 200));
+    
+    // Return mock counts
     return {
-      total: totalCount,
-      unread: unreadCount,
-      pending: pendingCount
+      total: 5,
+      unread: 2,
+      pending: 2
     };
   } catch (error) {
-    console.error('Error getting notification counts:', error);
+    console.error('Mock: Error getting notification counts:', error);
     return { total: 0, unread: 0, pending: 0 };
   }
+};
+
+/**
+ * Send video call notification (Mock Implementation)
+ */
+export const sendVideoCallNotification = async (
+  type: 'video_call_invitation' | 'video_call_accepted' | 'video_call_ended',
+  fromUserId: string,
+  fromUserName: string,
+  fromUserRole: 'doctor' | 'patient' | 'health_center',
+  toUserId: string,
+  toUserRole: 'doctor' | 'patient' | 'health_center',
+  appointmentId: string,
+  callId: string,
+  additionalData?: Record<string, any>
+): Promise<string> => {
+  let title = '';
+  let message = '';
+  
+  switch (type) {
+    case 'video_call_invitation':
+      title = 'Video Call Invitation';
+      message = `${fromUserName} is inviting you to a video call`;
+      break;
+    case 'video_call_accepted':
+      title = 'Video Call Accepted';
+      message = `${fromUserName} has accepted your video call`;
+      break;
+    case 'video_call_ended':
+      title = 'Video Call Ended';
+      message = `Your video call with ${fromUserName} has ended`;
+      break;
+  }
+
+  const notification: Omit<Notification, 'id' | 'createdAt' | 'updatedAt' | 'status'> = {
+    type,
+    title,
+    message,
+    fromUserId,
+    fromUserName,
+    fromUserRole,
+    toUserId,
+    toUserRole,
+    appointmentId,
+    priority: 'normal',
+    data: {
+      callId,
+      ...additionalData
+    }
+  };
+
+  return await sendNotification(notification);
 };
 
 // Export type for external use

@@ -1,21 +1,43 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import RealTimeNotificationDropdown from './RealTimeNotificationDropdown';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { 
-  sendAppointmentRequest,
-  sendNotification 
-} from '@/lib/notification-service';
+  Building2, 
+  Users, 
+  Phone, 
+  Video, 
+  AlertTriangle, 
+  Heart, 
+  Activity,
+  Clock,
+  MapPin,
+  User,
+  Plus,
+  Send,
+  Stethoscope,
+  FileText,
+  MessageCircle,
+  Eye,
+  Package,
+  ShoppingCart,
+  AlertCircle,
+  CheckCircle,
+  Minus,
+  Bell,
+  Calendar,
+  Star
+} from "lucide-react";
 import { 
   addPatientAndAppointment 
-} from '@/lib/patient-appointment-service';
-import { Timestamp } from 'firebase/firestore';
-import { Bell, Video, Users, TestTube } from 'lucide-react';
+} from "@/lib/patient-appointment-service";
+import { 
+  sendAppointmentRequest,
+  type Notification 
+} from "@/lib/notification-service";
+import { Timestamp } from '@/lib/firebase';
 
 export const NotificationTestPage: React.FC = () => {
   const [testConfig, setTestConfig] = useState({

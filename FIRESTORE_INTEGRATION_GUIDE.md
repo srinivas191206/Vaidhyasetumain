@@ -358,6 +358,7 @@ window.telemedicineExamples.completeWorkflow();
 3. **Agora Token Server**: Implement server-side token generation for Agora
 4. **Error Handling**: Add comprehensive error boundaries
 5. **Monitoring**: Set up Firebase Analytics and Crashlytics
+6. **Hosting Platform Configuration**: For Vercel deployment, refer to the [Vercel Deployment Guide](VERCEL_DEPLOYMENT_GUIDE.md) which explains how to properly configure environment variables and avoid common deployment issues like the "Secret does not exist" error.
 
 ## 📞 Support
 

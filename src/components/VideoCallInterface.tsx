@@ -77,12 +77,44 @@ export const VideoCallInterface: React.FC<VideoCallInterfaceProps> = ({
       call.onLocalStreamReady = (stream: MediaStream) => {
         if (localVideoRef.current) {
           localVideoRef.current.srcObject = stream;
+          // Ensure the video plays properly
+          const playPromise = localVideoRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                console.log('Local video playing');
+              })
+              .catch(error => {
+                console.warn('Auto-play prevented for local video:', error);
+                // Try to unmute and play again
+                if (localVideoRef.current) {
+                  localVideoRef.current.muted = true;
+                  localVideoRef.current.play().catch(err => console.warn('Second play attempt failed:', err));
+                }
+              });
+          }
         }
       };
       
       call.onRemoteStreamReady = (stream: MediaStream) => {
         if (remoteVideoRef.current) {
           remoteVideoRef.current.srcObject = stream;
+          // Ensure the video plays properly
+          const playPromise = remoteVideoRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise
+              .then(() => {
+                console.log('Remote video playing');
+              })
+              .catch(error => {
+                console.warn('Auto-play prevented for remote video:', error);
+                // Try to unmute and play again
+                if (remoteVideoRef.current) {
+                  remoteVideoRef.current.muted = true;
+                  remoteVideoRef.current.play().catch(err => console.warn('Second play attempt failed:', err));
+                }
+              });
+          }
         }
       };
       

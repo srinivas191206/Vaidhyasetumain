@@ -1,43 +1,64 @@
-// Firebase configuration for Vaidhya Setu telemedicine platform
-import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
-import { getAnalytics, Analytics } from 'firebase/analytics';
-import { getMessaging, Messaging } from 'firebase/messaging';
+// Mock Firebase configuration for Vaidhya Setu telemedicine platform
+// This replaces the actual Firebase services with mock implementations
+// allowing the application to run without Firebase dependencies
 
-// Firebase configuration object using Vite environment variables
+// Import mock service implementations
+import {
+  initializeApp,
+  getAuth,
+  collection,
+  addDoc,
+  getDoc,
+  updateDoc,
+  doc,
+  query,
+  where,
+  onSnapshot,
+  serverTimestamp,
+  Timestamp,
+  getStorage,
+  getAnalytics,
+  getMessaging,
+  type Analytics,
+  type Messaging
+} from '@/lib/mock-services';
+
+// Mock Firebase configuration object
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDIQP3Mgu1BpF4pftSelrDvE8nQSbhXwQ8",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "hackathon-79e80.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "hackathon-79e80",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "hackathon-79e80.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "338581325054",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:338581325054:web:10ad1b4e1793d5a7b491af",
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-WN45LN4MR6"
+  apiKey: "mock-api-key",
+  authDomain: "mock-auth-domain",
+  projectId: "mock-project-id",
+  storageBucket: "mock-storage-bucket",
+  messagingSenderId: "mock-messaging-sender-id",
+  appId: "mock-app-id",
+  measurementId: "mock-measurement-id"
 };
 
-// Initialize Firebase
+// Initialize Mock Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase services
+// Initialize Mock Firebase services
 const auth = getAuth(app);
-const db = getFirestore(app);
+const db = {  // Mock database object
+  collection: (name: string) => collection(db, name)
+};
 const storage = getStorage(app);
 
-// Initialize Analytics (only in browser environment)
+// Initialize Mock Analytics (only in browser environment)
 let analytics: Analytics | null = null;
 if (typeof window !== 'undefined') {
   analytics = getAnalytics(app);
 }
 
-// Initialize Messaging (only in browser environment)
+// Initialize Mock Messaging (only in browser environment)
 let messaging: Messaging | null = null;
-if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-  // Messaging requires service worker support
+if (typeof window !== 'undefined') {
   messaging = getMessaging(app);
 }
 
-// Export services for use across telemedicine platform
-export { auth, db, storage, analytics, messaging };
+// Export mock services for use across telemedicine platform
+export { auth, db, storage, analytics, messaging, 
+         collection, addDoc, getDoc, updateDoc, doc, 
+         query, where, onSnapshot, serverTimestamp, Timestamp };
+
 export default app;

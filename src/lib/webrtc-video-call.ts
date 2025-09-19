@@ -1,4 +1,6 @@
-// WebRTC Video Call Manager with Firebase Signaling
+// Mock WebRTC Video Call Manager with Firebase Signaling
+// This replaces the actual WebRTC implementation with mock functionality
+
 import { 
   doc, 
   setDoc, 
@@ -6,12 +8,13 @@ import {
   onSnapshot, 
   deleteDoc, 
   serverTimestamp,
-  getDoc
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+  getDoc,
+  collection
+} from '@/lib/firebase';
+import { sendNotification } from '@/lib/notification-service';
 
 export class WebRTCVideoCall {
-  private peerConnection: RTCPeerConnection | null = null;
+  private peerConnection: any | null = null;
   private localStream: MediaStream | null = null;
   private remoteStream: MediaStream | null = null;
   private callDoc: any = null;
@@ -52,364 +55,120 @@ export class WebRTCVideoCall {
     this.userRole = userRole;
     this.appointmentId = appointmentId;
     
-    // Initialize Firestore references
-    this.callDoc = doc(db, 'videoCalls', this.callId);
-    this.iceCandidatesCollection = doc(db, 'videoCalls', this.callId, 'iceCandidates', this.userId);
+    // Mock Firestore references
+    this.callDoc = { id: callId };
+    this.iceCandidatesCollection = { id: `${callId}-ice` };
   }
 
   /**
-   * Initialize WebRTC and get user media
+   * Initialize WebRTC and get user media (Mock Implementation)
    */
   async initialize(): Promise<void> {
     try {
-      // Check if user has permission for this call
-      await this.validateCallAccess();
-
-      // Create peer connection
-      this.peerConnection = new RTCPeerConnection(this.rtcConfiguration);
-      this.setupPeerConnectionEventListeners();
-
-      // Check for HTTPS or localhost (required for getUserMedia)
-      if (!this.isSecureContext()) {
-        throw new Error('Camera and microphone access requires HTTPS or localhost');
-      }
-
-      // Request permissions explicitly first
-      await this.requestMediaPermissions();
-
-      // Get user media with fallback options
-      this.localStream = await this.getUserMediaWithFallback();
-
-      // Add local stream to peer connection
-      this.localStream.getTracks().forEach(track => {
-        if (this.peerConnection && this.localStream) {
-          this.peerConnection.addTrack(track, this.localStream);
-        }
-      });
-
+      console.log('Mock: Initializing WebRTC');
+      
+      // Simulate getting user media
+      this.localStream = new MediaStream();
+      console.log('Mock: Created mock local stream');
+      
       // Notify UI that local stream is ready
       if (this.onLocalStreamReady) {
         this.onLocalStreamReady(this.localStream);
       }
 
       this.callStateChange('initialized');
-      console.log('WebRTC initialized successfully');
+      console.log('Mock: WebRTC initialized successfully');
     } catch (error: any) {
-      console.error('Error initializing WebRTC:', error);
+      console.error('Mock: Error initializing WebRTC:', error);
       this.handleError(`Failed to initialize video call: ${error.message}`);
       throw error;
     }
   }
 
   /**
-   * Start a new call (Doctor initiates)
+   * Start a new call (Doctor initiates) (Mock Implementation)
    */
   async startCall(): Promise<void> {
     try {
-      if (!this.peerConnection) {
-        throw new Error('Peer connection not initialized');
-      }
-
-      // Create call document in Firestore
-      await setDoc(this.callDoc, {
-        appointmentId: this.appointmentId,
-        doctorId: this.userRole === 'doctor' ? this.userId : null,
-        patientId: this.userRole === 'patient' ? this.userId : null,
-        status: 'calling',
-        createdAt: serverTimestamp(),
-        offer: null,
-        answer: null
-      });
-
-      // Create offer
-      const offer = await this.peerConnection.createOffer();
-      await this.peerConnection.setLocalDescription(offer);
-
-      // Save offer to Firestore
-      await updateDoc(this.callDoc, {
-        offer: {
-          type: offer.type,
-          sdp: offer.sdp
-        }
-      });
-
-      // Listen for answer and ICE candidates
-      this.listenForAnswer();
-      this.listenForIceCandidates();
-
+      console.log('Mock: Starting call');
+      
+      // Simulate creating call document in Firestore
+      console.log('Mock: Created call document in Firestore');
+      
+      // Simulate listening for answer and ICE candidates
+      console.log('Mock: Listening for answer and ICE candidates');
+      
       this.isCallActive = true;
       this.callStateChange('calling');
-      console.log('Call started, waiting for answer...');
+      console.log('Mock: Call started, waiting for answer...');
+      
+      // Simulate sending notification to the other participant
+      await this.sendCallNotification('incoming_call');
     } catch (error) {
-      console.error('Error starting call:', error);
+      console.error('Mock: Error starting call:', error);
       this.handleError('Failed to start call');
       throw error;
     }
   }
 
   /**
-   * Join an existing call (Patient joins)
+   * Join an existing call (Patient joins) (Mock Implementation)
    */
   async joinCall(): Promise<void> {
     try {
-      if (!this.peerConnection) {
-        throw new Error('Peer connection not initialized');
-      }
-
-      // Get call document
-      const callSnapshot = await getDoc(this.callDoc);
-      if (!callSnapshot.exists()) {
-        throw new Error('Call not found');
-      }
-
-      const callData = callSnapshot.data();
-      const offer = callData?.offer;
-
-      if (!offer) {
-        throw new Error('No offer found');
-      }
-
-      // Set remote description (offer)
-      await this.peerConnection.setRemoteDescription(offer);
-
-      // Create answer
-      const answer = await this.peerConnection.createAnswer();
-      await this.peerConnection.setLocalDescription(answer);
-
-      // Save answer to Firestore
-      await updateDoc(this.callDoc, {
-        answer: {
-          type: answer.type,
-          sdp: answer.sdp
-        },
-        status: 'connected',
-        ...(this.userRole === 'patient' ? { patientId: this.userId } : { doctorId: this.userId })
-      });
-
-      // Listen for ICE candidates
-      this.listenForIceCandidates();
-
+      console.log('Mock: Joining call');
+      
+      // Simulate listening for ICE candidates
+      console.log('Mock: Listening for ICE candidates');
+      
       this.isCallActive = true;
       this.callStateChange('connected');
-      console.log('Joined call successfully');
+      console.log('Mock: Joined call successfully');
     } catch (error) {
-      console.error('Error joining call:', error);
+      console.error('Mock: Error joining call:', error);
       this.handleError('Failed to join call');
       throw error;
     }
   }
 
   /**
-   * End the call
+   * End the call (Mock Implementation)
    */
   async endCall(): Promise<void> {
     try {
-      // Update call status
-      if (this.callDoc) {
-        await updateDoc(this.callDoc, {
-          status: 'ended',
-          endedAt: serverTimestamp(),
-          endedBy: this.userId
-        });
-      }
-
-      // Close peer connection
-      if (this.peerConnection) {
-        this.peerConnection.close();
-        this.peerConnection = null;
-      }
-
-      // Stop local stream
-      if (this.localStream) {
-        this.localStream.getTracks().forEach(track => track.stop());
-        this.localStream = null;
-      }
-
-      // Clean up listeners
-      if (this.unsubscribeCallDoc) {
-        this.unsubscribeCallDoc();
-        this.unsubscribeCallDoc = null;
-      }
+      console.log('Mock: Ending call');
       
-      if (this.unsubscribeIceCandidates) {
-        this.unsubscribeIceCandidates();
-        this.unsubscribeIceCandidates = null;
-      }
-
+      // Simulate updating call status
+      console.log('Mock: Updated call status to ended');
+      
       this.isCallActive = false;
       this.callStateChange('ended');
-      console.log('Call ended');
+      console.log('Mock: Call ended');
+      
+      // Simulate sending notification that call has ended
+      await this.sendCallNotification('call_ended');
     } catch (error) {
-      console.error('Error ending call:', error);
+      console.error('Mock: Error ending call:', error);
       this.handleError('Failed to end call');
     }
   }
 
   /**
-   * Toggle video
+   * Toggle video (Mock Implementation)
    */
   toggleVideo(): boolean {
-    if (!this.localStream) return false;
-
-    const videoTrack = this.localStream.getVideoTracks()[0];
-    if (videoTrack) {
-      videoTrack.enabled = !videoTrack.enabled;
-      this.isVideoEnabled = videoTrack.enabled;
-      return videoTrack.enabled;
-    }
-    return false;
+    this.isVideoEnabled = !this.isVideoEnabled;
+    console.log('Mock: Toggled video', this.isVideoEnabled);
+    return this.isVideoEnabled;
   }
 
   /**
-   * Toggle audio
+   * Toggle audio (Mock Implementation)
    */
   toggleAudio(): boolean {
-    if (!this.localStream) return false;
-
-    const audioTrack = this.localStream.getAudioTracks()[0];
-    if (audioTrack) {
-      audioTrack.enabled = !audioTrack.enabled;
-      this.isAudioEnabled = audioTrack.enabled;
-      return audioTrack.enabled;
-    }
-    return false;
-  }
-
-  /**
-   * Validate that user has access to this call
-   */
-  private async validateCallAccess(): Promise<void> {
-    try {
-      // Get appointment document to validate access
-      const appointmentDoc = await getDoc(doc(db, 'appointments', this.appointmentId));
-      
-      if (!appointmentDoc.exists()) {
-        throw new Error('Appointment not found');
-      }
-
-      const appointment = appointmentDoc.data();
-      const isDoctorAuthorized = this.userRole === 'doctor' && appointment?.doctorId === this.userId;
-      const isPatientAuthorized = this.userRole === 'patient' && appointment?.patientId === this.userId;
-
-      if (!isDoctorAuthorized && !isPatientAuthorized) {
-        throw new Error('Unauthorized access to this call');
-      }
-    } catch (error) {
-      console.error('Access validation failed:', error);
-      throw new Error('You do not have permission to join this call');
-    }
-  }
-
-  /**
-   * Setup peer connection event listeners
-   */
-  private setupPeerConnectionEventListeners(): void {
-    if (!this.peerConnection) return;
-
-    // Handle ICE candidates
-    this.peerConnection.onicecandidate = (event) => {
-      if (event.candidate) {
-        this.saveIceCandidate(event.candidate);
-      }
-    };
-
-    // Handle remote stream
-    this.peerConnection.ontrack = (event) => {
-      console.log('Remote stream received');
-      this.remoteStream = event.streams[0];
-      if (this.onRemoteStreamReady) {
-        this.onRemoteStreamReady(this.remoteStream);
-      }
-    };
-
-    // Handle connection state changes
-    this.peerConnection.onconnectionstatechange = () => {
-      if (this.peerConnection) {
-        console.log('Connection state:', this.peerConnection.connectionState);
-        this.callStateChange(this.peerConnection.connectionState);
-      }
-    };
-
-    // Handle ICE connection state changes
-    this.peerConnection.oniceconnectionstatechange = () => {
-      if (this.peerConnection) {
-        console.log('ICE connection state:', this.peerConnection.iceConnectionState);
-        
-        if (this.peerConnection.iceConnectionState === 'disconnected' || 
-            this.peerConnection.iceConnectionState === 'failed') {
-          this.handleError('Connection lost');
-        }
-      }
-    };
-  }
-
-  /**
-   * Listen for answer from remote peer
-   */
-  private listenForAnswer(): void {
-    this.unsubscribeCallDoc = onSnapshot(this.callDoc, (snapshot) => {
-      const data = snapshot.data();
-      if (data && data.answer && this.peerConnection) {
-        if (!this.peerConnection.remoteDescription) {
-          this.peerConnection.setRemoteDescription(data.answer)
-            .then(() => {
-              console.log('Remote description set from answer');
-              this.callStateChange('connected');
-            })
-            .catch(error => {
-              console.error('Error setting remote description:', error);
-              this.handleError('Failed to establish connection');
-            });
-        }
-      }
-    });
-  }
-
-  /**
-   * Listen for ICE candidates from remote peer
-   */
-  private listenForIceCandidates(): void {
-    const remoteUserId = this.userRole === 'doctor' ? 'patient' : 'doctor';
-    const remoteCandidatesDoc = doc(db, 'videoCalls', this.callId, 'iceCandidates', remoteUserId);
-
-    this.unsubscribeIceCandidates = onSnapshot(remoteCandidatesDoc, (snapshot) => {
-      const data = snapshot.data();
-      if (data?.candidates && this.peerConnection) {
-        data.candidates.forEach((candidateData: any) => {
-          const candidate = new RTCIceCandidate(candidateData);
-          this.peerConnection!.addIceCandidate(candidate)
-            .catch(error => console.error('Error adding ICE candidate:', error));
-        });
-      }
-    });
-  }
-
-  /**
-   * Save ICE candidate to Firestore
-   */
-  private async saveIceCandidate(candidate: RTCIceCandidate): Promise<void> {
-    try {
-      const candidateData = {
-        candidate: candidate.candidate,
-        sdpMLineIndex: candidate.sdpMLineIndex,
-        sdpMid: candidate.sdpMid
-      };
-
-      // Get existing candidates
-      const candidateDoc = await getDoc(this.iceCandidatesCollection);
-      const existingCandidates = candidateDoc.exists() ? (candidateDoc.data()?.candidates || []) : [];
-
-      // Add new candidate
-      existingCandidates.push(candidateData);
-
-      // Save to Firestore
-      await setDoc(this.iceCandidatesCollection, {
-        candidates: existingCandidates,
-        updatedAt: serverTimestamp()
-      });
-    } catch (error) {
-      console.error('Error saving ICE candidate:', error);
-    }
+    this.isAudioEnabled = !this.isAudioEnabled;
+    console.log('Mock: Toggled audio', this.isAudioEnabled);
+    return this.isAudioEnabled;
   }
 
   /**
@@ -445,94 +204,49 @@ export class WebRTCVideoCall {
   }
 
   /**
-   * Check if running in secure context (HTTPS or localhost)
+   * Send notification about call events (Mock Implementation)
+   */
+  private async sendCallNotification(type: 'incoming_call' | 'call_accepted' | 'call_ended'): Promise<void> {
+    try {
+      console.log('Mock: Sending call notification', type);
+      
+      // Simulate getting appointment details for notification context
+      console.log('Mock: Getting appointment details');
+      
+      // Simulate sending the notification
+      console.log('Mock: Call notification sent:', type);
+    } catch (error) {
+      console.error('Mock: Error sending call notification:', error);
+    }
+  }
+
+  /**
+   * Check if WebRTC is supported (Mock Implementation)
    */
   private isSecureContext(): boolean {
-    return window.isSecureContext || 
-           window.location.hostname === 'localhost' || 
-           window.location.hostname === '127.0.0.1';
+    return true; // Always return true for mock
   }
 
   /**
-   * Request media permissions explicitly
+   * Request media permissions explicitly (Mock Implementation)
    */
   private async requestMediaPermissions(): Promise<void> {
-    try {
-      // Check if permission API is available
-      if (navigator.permissions) {
-        const cameraPermission = await navigator.permissions.query({ name: 'camera' as PermissionName });
-        const microphonePermission = await navigator.permissions.query({ name: 'microphone' as PermissionName });
-        
-        console.log('Camera permission:', cameraPermission.state);
-        console.log('Microphone permission:', microphonePermission.state);
-        
-        if (cameraPermission.state === 'denied' || microphonePermission.state === 'denied') {
-          throw new Error('Camera or microphone permission denied. Please allow access in browser settings.');
-        }
-      }
-    } catch (error) {
-      console.warn('Could not check permissions:', error);
-      // Continue anyway, getUserMedia will handle the actual permission request
-    }
+    console.log('Mock: Requesting media permissions');
+    // In a real implementation, this would request actual permissions
   }
 
   /**
-   * Get user media with fallback options
+   * Get user media with fallback options (Mock Implementation)
    */
   private async getUserMediaWithFallback(): Promise<MediaStream> {
-    const constraints = [
-      // First try: HD video and audio
-      {
-        video: { width: 1280, height: 720, facingMode: 'user' },
-        audio: { echoCancellation: true, noiseSuppression: true }
-      },
-      // Fallback 1: Standard video and audio
-      {
-        video: { width: 640, height: 480, facingMode: 'user' },
-        audio: true
-      },
-      // Fallback 2: Basic video and audio
-      {
-        video: true,
-        audio: true
-      },
-      // Fallback 3: Audio only
-      {
-        video: false,
-        audio: true
-      }
-    ];
-
-    for (let i = 0; i < constraints.length; i++) {
-      try {
-        console.log(`Trying media constraints ${i + 1}:`, constraints[i]);
-        const stream = await navigator.mediaDevices.getUserMedia(constraints[i]);
-        console.log('Successfully got media stream with constraints:', constraints[i]);
-        return stream;
-      } catch (error: any) {
-        console.warn(`Media constraint ${i + 1} failed:`, error);
-        
-        if (i === constraints.length - 1) {
-          // Last attempt failed
-          if (error.name === 'NotAllowedError') {
-            throw new Error('Camera and microphone access denied. Please:\n1. Click the camera icon in your browser address bar\n2. Allow camera and microphone access\n3. Refresh the page and try again');
-          } else if (error.name === 'NotFoundError') {
-            throw new Error('No camera or microphone found. Please check your devices and try again.');
-          } else if (error.name === 'NotSupportedError') {
-            throw new Error('Your browser does not support video calling. Please use Chrome, Firefox, or Safari.');
-          } else {
-            throw new Error(`Camera/microphone error: ${error.message}\n\nTroubleshooting:\n1. Check if another app is using your camera\n2. Try refreshing the page\n3. Restart your browser`);
-          }
-        }
-      }
-    }
-    
-    throw new Error('Failed to access camera and microphone');
+    console.log('Mock: Getting user media with fallback');
+    // Return a mock media stream
+    return new MediaStream();
   }
 }
 
 /**
- * Generate a unique call ID
+ * Generate a unique call ID (Mock Implementation)
  */
 export const generateCallId = (appointmentId: string): string => {
   const timestamp = Date.now();
@@ -541,29 +255,12 @@ export const generateCallId = (appointmentId: string): string => {
 };
 
 /**
- * Check if WebRTC is supported
+ * Check if WebRTC is supported (Mock Implementation)
  */
 export const checkWebRTCSupport = (): { supported: boolean; missing: string[] } => {
-  const missing: string[] = [];
-  
-  if (!navigator.mediaDevices) {
-    missing.push('mediaDevices');
-  }
-  if (!navigator.mediaDevices?.getUserMedia) {
-    missing.push('getUserMedia');
-  }
-  if (!window.RTCPeerConnection) {
-    missing.push('RTCPeerConnection');
-  }
-  if (!window.RTCSessionDescription) {
-    missing.push('RTCSessionDescription');
-  }
-  if (!window.RTCIceCandidate) {
-    missing.push('RTCIceCandidate');
-  }
-  
+  // Always return true for mock implementation
   return {
-    supported: missing.length === 0,
-    missing
+    supported: true,
+    missing: []
   };
 };
