@@ -40,9 +40,9 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
     patient: any;
   }>({ isOpen: false, patient: null });
   
-  // Admin configuration - in real app this would come from authentication
-  const doctorId = "admin_001";
-  const doctorName = `Admin ${userName}`;
+  // Doctor configuration - in real app this would come from authentication
+  const doctorId = "doctor_001";
+  const doctorName = `Dr. ${userName}`;
 
   const quickActions = [
     { name: "Appointments", icon: Calendar, color: "bg-medical-blue/10 text-medical-blue", key: "appointments" },
@@ -51,58 +51,13 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
     { name: "Prescriptions", icon: Pill, color: "bg-destructive/10 text-destructive", key: "prescriptions" }
   ];
 
-  const todaysSchedule = [
-    { 
-      time: "10:00 AM", 
-      patient: "Sarah Johnson", 
-      info: "Cardiology Consultation", 
-      urgent: false,
-      age: 45,
-      condition: "Chest Pain Evaluation",
-      bloodPressure: "140/90",
-      heartRate: "82 bpm",
-      symptoms: "Sharp chest pain, shortness of breath during physical activity"
-    },
-    { 
-      time: "11:30 AM", 
-      patient: "Michael Chen", 
-      info: "Follow-up Appointment", 
-      urgent: true,
-      age: 52,
-      condition: "Hypertension Follow-up",
-      bloodPressure: "155/95",
-      heartRate: "76 bpm",
-      symptoms: "Mild headaches, occasional dizziness"
-    },
-    { 
-      time: "2:00 PM", 
-      patient: "Emma Rodriguez", 
-      info: "Initial Assessment", 
-      urgent: false,
-      age: 38,
-      condition: "Arrhythmia Assessment",
-      bloodPressure: "130/85",
-      heartRate: "105 bpm",
-      symptoms: "Irregular heartbeat, palpitations, fatigue"
-    },
-    { 
-      time: "3:30 PM", 
-      patient: "David Thompson", 
-      info: "Prescription Review", 
-      urgent: false,
-      age: 61,
-      condition: "Post-Surgery Check",
-      bloodPressure: "125/80",
-      heartRate: "68 bpm",
-      symptoms: "Mild chest discomfort at incision site"
-    }
-  ];
-
-  const recentActivity = [
-    { activity: "Last consultation with Maria Santos", time: "2 hours ago", type: "consultation" },
-    { activity: "New message from Rural Health Center", time: "4 hours ago", type: "message" },
-    { activity: "Lab results uploaded for John Doe", time: "6 hours ago", type: "results" },
-    { activity: "Prescription sent to Local Pharmacy", time: "1 day ago", type: "prescription" }
+  // Bottom navigation items
+  const bottomNavItems = [
+    { id: "dashboard", name: "Home", icon: Home },
+    { id: "appointments", name: "Appointments", icon: Calendar },
+    { id: "patients", name: "Patients", icon: Users },
+    { id: "messages", name: "Messages", icon: MessageCircle },
+    { id: "profile", name: "Profile", icon: User }
   ];
 
   return (
@@ -139,7 +94,7 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
             
             <RealTimeNotificationDropdown 
               userId={doctorId}
-              userRole="admin"
+              userRole="doctor"
               userName={doctorName}
             />
             
@@ -182,7 +137,7 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6 space-y-6">
+      <main className="container mx-auto px-4 py-6 space-y-6 pb-28">
         {activeTab === "dashboard" && (
           <>
             {/* Welcome Card */}
@@ -191,7 +146,7 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h1 className="text-2xl font-bold text-foreground mb-2">
-                      Welcome back, Admin {userName}!
+                      Welcome back, Dr. {userName}!
                     </h1>
                     <p className="text-muted-foreground">
                       You have <span className="font-semibold text-primary">5 appointments</span> scheduled for today.
@@ -373,6 +328,27 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
         {activeTab === "profile" && <ProfileTab userName={userName} />}
 
       </main>
+
+      {/* Bottom Navigation Bar - Perfectly aligned on all screen sizes */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background border-t z-50">
+        <div className="grid grid-cols-5 h-16 w-full">
+          {bottomNavItems.map((item) => (
+            <Button
+              key={item.id}
+              variant="ghost"
+              className={`flex flex-col items-center justify-center h-full w-full rounded-none ${
+                activeTab === item.id 
+                  ? "text-primary bg-primary/10" 
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+              onClick={() => setActiveTab(item.id)}
+            >
+              <item.icon className="h-5 w-5" />
+              <span className="text-xs mt-1">{item.name}</span>
+            </Button>
+          ))}
+        </div>
+      </div>
 
       {/* Video Consultation Modal */}
       <VideoConsultation

@@ -10,13 +10,10 @@ import {
   updateDoc,
   doc,
   getDoc,
-  getDocs,
   collection,
-  orderBy,
-  limit,
-  Timestamp,
-  type FieldValue
+  Timestamp
 } from '@/lib/firebase';
+import { handleAppNotification } from '@/lib/push-notification-service';
 
 // Mock implementation of Firebase Messaging functions
 const isSupported = async () => {
@@ -60,9 +57,9 @@ export interface Notification {
   status: 'pending' | 'read' | 'accepted' | 'rejected' | 'expired';
   priority: 'normal' | 'urgent' | 'emergency';
   data?: Record<string, any>; // Additional data for the notification
-  createdAt: Timestamp | FieldValue;
-  updatedAt: Timestamp | FieldValue;
-  expiresAt?: Timestamp; // For time-sensitive notifications
+  createdAt: any; // Using any to avoid type issues
+  updatedAt: any;
+  expiresAt?: any;
 }
 
 // Mock Firestore collections
@@ -79,6 +76,8 @@ async function sendPushNotification(notification: Omit<Notification, 'id'>): Pro
 
   try {
     console.log('Mock: Would send push notification:', notification.title, notification.message);
+    // Handle the notification with our push notification service
+    await handleAppNotification(notification as Notification);
   } catch (error) {
     console.error('Mock: Error sending push notification:', error);
   }
@@ -286,25 +285,19 @@ export const listenToUserNotifications = (
   const mockNotifications: Notification[] = [
     {
       id: 'mock-notification-1',
-      type: 'appointment_request',
-      title: 'New Consultation Request',
-      message: 'Rural Health Center requests urgent consultation for patient John Doe',
-      fromUserId: 'mock-health-center-id',
-      fromUserName: 'Rural Health Center',
-      fromUserRole: 'health_center',
+      type: 'consultation_started',
+      title: 'Video Consultation Started',
+      message: 'Your video consultation with Dr. Smith has started',
+      fromUserId: 'mock-doctor-id',
+      fromUserName: 'Dr. Smith',
+      fromUserRole: 'doctor',
       toUserId: userId,
-      toUserRole: 'doctor',
+      toUserRole: 'health_center',
       appointmentId: 'mock-appointment-id',
-      patientId: 'mock-patient-id',
-      doctorId: userId,
-      healthCenterId: 'mock-health-center-id',
       status: 'pending',
-      priority: 'urgent',
+      priority: 'normal',
       data: {
-        patientName: 'John Doe',
-        symptoms: 'High fever and cough',
-        requestedTime: new Date().toISOString(),
-        healthCenterName: 'Rural Health Center'
+        patientName: 'John Doe'
       },
       createdAt: Timestamp.fromDate(new Date()),
       updatedAt: Timestamp.fromDate(new Date())

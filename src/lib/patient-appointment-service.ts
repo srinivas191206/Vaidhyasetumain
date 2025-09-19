@@ -18,6 +18,7 @@ import {
   type Patient,
   type Appointment 
 } from './firestore-collections';
+import { sendNotification } from '@/lib/notification-service';
 
 /**
  * Add a new patient from Health Center (Mock Implementation)
@@ -184,6 +185,12 @@ export const updateAppointmentStatus = async (
     // Simulate network delay
     await new Promise(resolve => setTimeout(resolve, 300));
     console.log(`Mock: Appointment ${appointmentId} status updated to ${status}`);
+    
+    // Send notification about status change if needed
+    if (status === 'confirmed' || status === 'completed') {
+      // In a real implementation, we would send a notification to the patient
+      console.log('Mock: Would send notification about appointment status change');
+    }
   } catch (error) {
     console.error('Mock: Error updating appointment status:', error);
     throw new Error('Failed to update appointment status: ' + (error instanceof Error ? error.message : 'Unknown error'));

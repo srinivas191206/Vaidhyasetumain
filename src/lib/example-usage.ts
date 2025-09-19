@@ -35,7 +35,7 @@ export const exampleHealthCenterWorkflow = async () => {
     const patientData = {
       name: 'Rahul Kumar',
       age: 35,
-      contact: '+91 98765 43210',
+      contact: '+91 97049 15150',
       address: 'Village Kumarganj, Rajasthan',
       medicalHistory: 'Diabetes, Hypertension',
       allergies: 'Penicillin'

@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Button } from "@/components/ui/button";
 import { 
   User, 
   MapPin, 
@@ -12,7 +14,8 @@ import {
   Award,
   Stethoscope,
   Clock,
-  TrendingUp
+  TrendingUp,
+  Check
 } from "lucide-react";
 
 interface ProfileTabProps {
@@ -20,26 +23,31 @@ interface ProfileTabProps {
 }
 
 const ProfileTab = ({ userName }: ProfileTabProps) => {
+  // State for off days selection
+  const [selectedOffDays, setSelectedOffDays] = useState<string[]>([]);
+  const [savedOffDays, setSavedOffDays] = useState<string[]>([]);
+  const [isSaving, setIsSaving] = useState(false);
+
   const doctorProfile = {
     name: userName,
-    specialization: "Interventional Cardiology",
-    qualification: "MD (Cardiology), DM (Interventional Cardiology)",
+    specialization: "General Doctor",
+    qualification: "MBBS, MD (General Medicine)",
     institution: "All India Institute of Medical Sciences (AIIMS), New Delhi",
-    experience: "12 years",
+    experience: "8 years",
     joinedMediConnect: "January 2022",
     totalConsultations: 2847,
     completionRate: 98.2,
     averageRating: 4.8,
     responseTime: "< 2 minutes",
     specializations: [
-      "Coronary Angioplasty",
-      "Heart Failure Management", 
-      "Cardiac Arrhythmias",
-      "Preventive Cardiology",
-      "Echocardiography"
+      "General Medicine",
+      "Preventive Healthcare", 
+      "Chronic Disease Management",
+      "Emergency Care",
+      "Health Education"
     ],
     achievements: [
-      "Top Rated Cardiologist 2024",
+      "Top Rated General Practitioner 2024",
       "Excellence in Rural Healthcare",
       "1000+ Successful Consultations",
       "Patient Choice Award"
@@ -86,6 +94,37 @@ const ProfileTab = ({ userName }: ProfileTabProps) => {
     { month: "May", consultations: 298 },
     { month: "Jun", consultations: 334 }
   ];
+
+  // Days of the week
+  const daysOfWeek = [
+    { id: "monday", name: "Monday" },
+    { id: "tuesday", name: "Tuesday" },
+    { id: "wednesday", name: "Wednesday" },
+    { id: "thursday", name: "Thursday" },
+    { id: "friday", name: "Friday" },
+    { id: "saturday", name: "Saturday" },
+    { id: "sunday", name: "Sunday" }
+  ];
+
+  // Handle off day selection
+  const toggleOffDay = (dayId: string) => {
+    if (selectedOffDays.includes(dayId)) {
+      setSelectedOffDays(selectedOffDays.filter(day => day !== dayId));
+    } else {
+      setSelectedOffDays([...selectedOffDays, dayId]);
+    }
+  };
+
+  // Save off days
+  const saveOffDays = () => {
+    setIsSaving(true);
+    // Simulate API call
+    setTimeout(() => {
+      setSavedOffDays([...selectedOffDays]);
+      setIsSaving(false);
+      alert("Your off days have been saved successfully!");
+    }, 500);
+  };
 
   return (
     <div className="space-y-6 animate-fade-in-up">
@@ -179,6 +218,63 @@ const ProfileTab = ({ userName }: ProfileTabProps) => {
                   </Badge>
                 ))}
               </div>
+            </div>
+
+            {/* Off Days Selection */}
+            <div>
+              <h3 className="text-lg font-semibold text-foreground mb-3">Weekly Off Days</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Select the days when you will be unavailable for consultations. This will help patients and health centers schedule appointments accordingly.
+              </p>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-2 mb-4">
+                {daysOfWeek.map((day) => (
+                  <Button
+                    key={day.id}
+                    variant={selectedOffDays.includes(day.id) ? "default" : "outline"}
+                    className={`h-12 flex flex-col items-center justify-center ${
+                      selectedOffDays.includes(day.id) 
+                        ? "bg-primary text-primary-foreground" 
+                        : "bg-background hover:bg-accent"
+                    }`}
+                    onClick={() => toggleOffDay(day.id)}
+                  >
+                    <span className="text-xs font-medium">{day.name.substring(0, 3)}</span>
+                    {selectedOffDays.includes(day.id) && (
+                      <Check className="w-3 h-3 mt-1" />
+                    )}
+                  </Button>
+                ))}
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-muted-foreground">
+                  {selectedOffDays.length > 0 
+                    ? `Selected: ${selectedOffDays.map(dayId => 
+                        daysOfWeek.find(d => d.id === dayId)?.name
+                      ).join(", ")}` 
+                    : "No off days selected"}
+                </div>
+                <Button 
+                  onClick={saveOffDays}
+                  disabled={isSaving || selectedOffDays.length === 0}
+                  className="medical-gradient"
+                >
+                  {isSaving ? "Saving..." : "Save Off Days"}
+                </Button>
+              </div>
+              
+              {savedOffDays.length > 0 && (
+                <div className="mt-3 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <p className="text-sm text-green-700 dark:text-green-300">
+                    <strong>Saved:</strong> Your off days are set to: {
+                      savedOffDays.map(dayId => 
+                        daysOfWeek.find(d => d.id === dayId)?.name
+                      ).join(", ")
+                    }
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Achievements */}

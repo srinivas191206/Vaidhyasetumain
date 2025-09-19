@@ -8,30 +8,31 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Building2, 
   Users, 
-  Phone, 
+  Package, 
+  ShoppingCart, 
+  Plus, 
+  Eye, 
   Video, 
+  MessageCircle, 
   AlertTriangle, 
-  Heart, 
-  Activity,
-  Clock,
-  MapPin,
-  User,
-  Plus,
-  Send,
+  FileText, 
+  Send, 
+  Clock, 
+  Home, 
+  ArrowLeft, 
+  MapPin, 
+  Phone, 
+  User, 
   Stethoscope,
-  FileText,
-  MessageCircle,
-  Eye,
-  Package,
-  ShoppingCart,
+  Calendar as CalendarIcon,
   AlertCircle,
   CheckCircle,
-  Minus,
-  Home,
-  ArrowLeft
+  CreditCard,
+  IndianRupee
 } from "lucide-react";
 import VideoConsultation from "./VideoConsultation";
 import { 
@@ -43,6 +44,20 @@ import {
   type Notification 
 } from "@/lib/notification-service";
 import { Timestamp } from '@/lib/firebase';
+
+// Define the booking interface
+interface Booking {
+  id: string;
+  patientName: string;
+  doctorName: string;
+  doctorId: string;
+  date: string;
+  time: string;
+  amount: number;
+  paymentStatus: 'pending' | 'confirmed';
+  bookingStatus: 'pending' | 'confirmed' | 'completed';
+  createdAt: Date;
+}
 
 interface RuralCenterDashboardProps {
   centerName: string;
@@ -60,7 +75,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
     patient: any;
   }>({ isOpen: false, patient: null });
   const [chatDialog, setChatDialog] = useState(false);
-  const [selectedAdmin, setSelectedAdmin] = useState<any>(null);
+  const [selectedDoctor, setSelectedDoctor] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
   
@@ -72,6 +87,19 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
   const healthCenterId = "health_center_andhra_001";
   const healthCenterName = centerName;
   
+  // Booking system state
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bookingDialog, setBookingDialog] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [bookingForm, setBookingForm] = useState({
+    patientName: "",
+    doctorName: "",
+    doctorId: "",
+    date: new Date().toISOString().split('T')[0],
+    time: "",
+    amount: ""
+  });
+  
   // Medicine Inventory State
   const [inventoryDialog, setInventoryDialog] = useState(false);
   const [inventoryRequestDialog, setInventoryRequestDialog] = useState(false);
@@ -80,7 +108,6 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
     medicineName: "",
     quantity: "",
     urgency: "normal",
-    reason: "",
     currentStock: ""
   });
   
@@ -100,7 +127,11 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
     bloodPressure: "",
     heartRate: "",
     temperature: "",
-    weight: ""
+    weight: "",
+    preferredDate: "",
+    preferredTime: "",
+    noSpecificRequirements: false,
+    paymentStatus: "pending" // Add payment status to registration form
   });
   const [registeredPatients, setRegisteredPatients] = useState([
     {
@@ -110,7 +141,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       type: "Follow-up",
       condition: "Diabetes Management",
       patientId: "RHC001",
-      phone: "+91 98765 43210",
+      phone: "+91 97049 15150",
       address: "Village Venkatagiri, Andhra Pradesh",
       medicalHistory: "Diagnosed with Type 2 Diabetes 3 years ago. Currently on Metformin 500mg twice daily.",
       allergies: "None known",
@@ -129,7 +160,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       type: "Initial Consultation",
       condition: "Hypertension",
       patientId: "RHC002",
-      phone: "+91 97654 32109",
+      phone: "+91 97049 15150",
       address: "Village Tirupati, Andhra Pradesh",
       medicalHistory: "No significant past medical history. Family history of hypertension.",
       allergies: "Shellfish",
@@ -141,7 +172,29 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
         weight: "75 kg"
       }
     }
-  ]);
+  ] as Array<{
+    name: string;
+    age: number;
+    appointment: string;
+    type: string;
+    condition: string;
+    patientId: string;
+    phone: string;
+    address: string;
+    medicalHistory: string;
+    allergies: string;
+    lastVisit: string;
+    vitals: {
+      bloodPressure: string;
+      heartRate: string;
+      temperature: string;
+      weight: string;
+    };
+    appointmentSlot?: string;
+    gender?: string;
+    symptoms?: string;
+    emergencyContact?: string;
+  }>);
   const [consultationRequest, setConsultationRequest] = useState({
     patientName: "",
     age: "",
@@ -150,6 +203,78 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
     vitals: "",
     urgency: "normal"
   });
+
+  // Available doctors for booking
+  const availableDoctors = [
+    {
+      name: "Dr. Suresh Reddy",
+      specialty: "General Medicine",
+      status: "Available",
+      hospital: "District Hospital, Hyderabad",
+      responseTime: "< 5 minutes",
+      id: "doctor1",
+      avatar: "SR",
+      online: true
+    },
+    {
+      name: "Dr. Anitha Rao",
+      specialty: "General Medicine",
+      status: "In Consultation",
+      hospital: "Community Health Center, Hyderabad",
+      responseTime: "15 minutes",
+      id: "doctor2",
+      avatar: "AR",
+      online: true
+    },
+    {
+      name: "Dr. Prakash Kumar",
+      specialty: "General Medicine",
+      status: "Available",
+      hospital: "Primary Health Center, Visakhapatnam",
+      responseTime: "< 3 minutes",
+      id: "doctor3",
+      avatar: "PK",
+      online: true
+    }
+  ];
+
+  // Sample time slots
+  const timeSlots = [
+    "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", 
+    "11:00 AM", "11:30 AM", "2:00 PM", "2:30 PM", 
+    "3:00 PM", "3:30 PM", "4:00 PM", "4:30 PM"
+  ];
+
+  // Initialize with some sample bookings
+  useEffect(() => {
+    const sampleBookings: Booking[] = [
+      {
+        id: "booking1",
+        patientName: "Lakshmi Devi",
+        doctorName: "Dr. Suresh Reddy",
+        doctorId: "doctor1",
+        date: new Date().toISOString().split('T')[0],
+        time: "10:00 AM",
+        amount: 100,
+        paymentStatus: "confirmed",
+        bookingStatus: "completed",
+        createdAt: new Date()
+      },
+      {
+        id: "booking2",
+        patientName: "Ravi Kumar",
+        doctorName: "Dr. Anitha Rao",
+        doctorId: "doctor2",
+        date: new Date().toISOString().split('T')[0],
+        time: "11:30 AM",
+        amount: 100,
+        paymentStatus: "pending",
+        bookingStatus: "confirmed",
+        createdAt: new Date()
+      }
+    ];
+    setBookings(sampleBookings);
+  }, []);
 
   // Listen to notifications for appointment responses
   useEffect(() => {
@@ -165,9 +290,46 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
         
         // Show toast or alert for the response
         if (latestNotification.type === 'appointment_accepted') {
-          alert(`Good news! ${latestNotification.fromUserName} has accepted the consultation request for ${latestNotification.data?.patientName}`);
+          // Create a more user-friendly alert with options
+          const message = `Good news! ${latestNotification.fromUserName} has accepted the consultation request for ${latestNotification.data?.patientName}`;
+          
+          // Show browser notification
+          if (typeof window !== 'undefined' && 'Notification' in window) {
+            new Notification('Consultation Accepted', {
+              body: message,
+              icon: '/logo.png'
+            });
+          }
+          
+          // Show alert with option to start video call
+          if (confirm(`${message}\n\nWould you like to start the video consultation now?`)) {
+            setVideoConsultation({
+              isOpen: true,
+              patient: {
+                name: latestNotification.data?.patientName || "Patient",
+                age: latestNotification.data?.patientAge || 0,
+                condition: latestNotification.data?.patientCondition || "Consultation",
+                time: "Now",
+                urgent: latestNotification.priority === 'emergency' || latestNotification.priority === 'urgent',
+                bloodPressure: latestNotification.data?.bloodPressure || "Not provided",
+                heartRate: latestNotification.data?.heartRate || "Not provided",
+                symptoms: latestNotification.data?.symptoms || "Consultation requested"
+              }
+            });
+          }
         } else {
-          alert(`${latestNotification.fromUserName} declined the consultation request for ${latestNotification.data?.patientName}. Reason: ${latestNotification.data?.rejectionReason}`);
+          // Appointment rejected
+          const message = `${latestNotification.fromUserName} declined the consultation request for ${latestNotification.data?.patientName}. Reason: ${latestNotification.data?.rejectionReason}`;
+          
+          // Show browser notification
+          if (typeof window !== 'undefined' && 'Notification' in window) {
+            new Notification('Consultation Declined', {
+              body: message,
+              icon: '/logo.png'
+            });
+          }
+          
+          alert(message);
         }
       }
     });
@@ -182,7 +344,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       condition: "Severe chest pain",
       vitals: "BP: 165/95, HR: 92 bpm",
       time: "15 minutes ago",
-      priority: "Critical"
+      priority: "High"
     },
     {
       name: "Krishna Rao",
@@ -194,38 +356,89 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
     }
   ];
 
-  const availableAdmins = [
-    {
-      name: "Admin Suresh Reddy",
-      specialty: "Cardiology",
-      status: "Available",
-      hospital: "Apollo Hospitals, Hyderabad",
-      responseTime: "< 5 minutes",
-      id: "specialist1",
-      avatar: "SR",
-      online: true
-    },
-    {
-      name: "Admin Anitha Rao",
-      specialty: "Cardiology",
-      status: "In Consultation",
-      hospital: "Yashoda Hospitals, Hyderabad",
-      responseTime: "15 minutes",
-      id: "specialist2",
-      avatar: "AR",
-      online: true
-    },
-    {
-      name: "Admin Prakash Kumar",
-      specialty: "Internal Medicine",
-      status: "Available",
-      hospital: "Care Hospitals, Visakhapatnam",
-      responseTime: "< 3 minutes",
-      id: "specialist3",
-      avatar: "PK",
-      online: true
+  // Booking functions
+  const handleBookingSubmit = () => {
+    if (!bookingForm.patientName || !bookingForm.doctorName || !bookingForm.date || !bookingForm.time) {
+      alert("Please fill in all required fields");
+      return;
     }
-  ];
+
+    // Debug: log the date being used
+    // console.log('Booking form date:', bookingForm.date);
+    // console.log('Today:', new Date().toISOString().split('T')[0]);
+    
+    const newBooking: Booking = {
+      id: `booking_${Date.now()}`,
+      patientName: bookingForm.patientName,
+      doctorName: bookingForm.doctorName,
+      doctorId: bookingForm.doctorId,
+      date: bookingForm.date || new Date().toISOString().split('T')[0],
+      time: bookingForm.time,
+      amount: 100,
+      paymentStatus: "pending",
+      bookingStatus: "pending",
+      createdAt: new Date()
+    };
+
+    // Debug: log the new booking
+    // console.log('Adding new booking:', newBooking);
+    setBookings([...bookings, newBooking]);
+    
+    // Reset form but keep today's date as default
+    setBookingForm({
+      patientName: "",
+      doctorName: "",
+      doctorId: "",
+      date: new Date().toISOString().split('T')[0],
+      time: "",
+      amount: ""
+    });
+    
+    setBookingDialog(false);
+    alert("Booking request submitted successfully!");
+  };
+
+  const confirmPayment = (bookingId: string) => {
+    setBookings(bookings.map(booking => 
+      booking.id === bookingId 
+        ? { ...booking, paymentStatus: "confirmed" } 
+        : booking
+    ));
+    alert("Payment confirmed for booking!");
+  };
+
+  const completeBooking = (bookingId: string) => {
+    setBookings(bookings.map(booking => 
+      booking.id === bookingId 
+        ? { ...booking, bookingStatus: "completed" } 
+        : booking
+    ));
+    alert("Booking marked as completed!");
+  };
+
+  const handleDoctorSelect = (doctorId: string) => {
+    const doctor = availableDoctors.find(d => d.id === doctorId);
+    if (doctor) {
+      setBookingForm({
+        ...bookingForm,
+        doctorName: doctor.name,
+        doctorId: doctor.id
+      });
+    }
+  };
+
+  // Get today's bookings
+  const today = new Date().toISOString().split('T')[0];
+  const todaysBookings = bookings.filter(booking => {
+    // Debug: log booking dates for troubleshooting
+    // console.log('Booking date:', booking.date, 'Today:', today, 'Match:', booking.date === today);
+    return booking.date === today;
+  });
+
+  // Calculate total amount collected for today
+  const totalAmountCollected = todaysBookings
+    .filter(booking => booking.paymentStatus === "confirmed" && booking.bookingStatus === "completed")
+    .reduce((sum, booking) => sum + booking.amount, 0);
 
   // Medicine Inventory Data
   const currentInventory = [
@@ -248,6 +461,22 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
     { 
       name: "Amoxicillin 250mg", 
       currentStock: 80, 
+      minRequired: 150, 
+      status: "low",
+      expiry: "Mar 2025",
+      category: "Antibiotic"
+    },
+    { 
+      name: "Metformin 500mg", 
+      currentStock: 150, 
+      minRequired: 200, 
+      status: "normal",
+      expiry: "Apr 2025",
+      category: "Diabetes"
+    },
+    { 
+      name: "Lisinopril 10mg", 
+      currentStock: 100, 
       minRequired: 150, 
       status: "low",
       expiry: "Nov 2024",
@@ -280,24 +509,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
   ];
 
   const requestConsultation = (patient: any) => {
-    if (patient.priority === "Critical") {
-      // Direct emergency video consultation
-      setVideoConsultation({
-        isOpen: true,
-        patient: {
-          name: patient.name,
-          age: patient.age,
-          condition: patient.condition,
-          time: "Emergency",
-          urgent: true,
-          bloodPressure: patient.vitals?.split(", ")[0]?.split(": ")[1] || "160/95",
-          heartRate: patient.vitals?.split(", ")[1]?.split(": ")[1] || "95 bpm",
-          symptoms: patient.condition
-        }
-      });
-    } else {
-      alert(`Consultation requested for ${patient.name}. Admin will be notified.`);
-    }
+    alert(`Consultation requested for ${patient.name}. Doctor will be notified.`);
   };
 
   const handleConsultationSubmit = async () => {
@@ -309,7 +521,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
     // Validate doctor selection
     const doctorId = "doctor_specialist_001";
     if (!doctorId) {
-      alert("Please select an admin");
+      alert("Please select a doctor");
       return;
     }
     
@@ -410,14 +622,14 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
     setConsultationDialog(true);
   };
 
-  const startChat = (admin: any) => {
-    setSelectedAdmin(admin);
-    // Initialize chat with welcome message from admin
+  const startChat = (doctor: any) => {
+    setSelectedDoctor(doctor);
+    // Initialize chat with welcome message from doctor
     setMessages([
       {
         id: 1,
-        sender: admin.name,
-        message: `Hello! This is ${admin.name} from ${admin.hospital}. How can I assist you today?`,
+        sender: doctor.name,
+        message: `Hello! This is ${doctor.name} from ${doctor.hospital}. How can I assist you today?`,
         timestamp: new Date().toLocaleTimeString(),
         isAdmin: true
       }
@@ -439,7 +651,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
     setMessages(prev => [...prev, userMessage]);
     setNewMessage("");
     
-    // Simulate admin response after 2 seconds
+    // Simulate doctor response after 2 seconds
     setTimeout(() => {
       const responses = [
         "Thank you for sharing that information. Can you provide more details about the patient's symptoms?",
@@ -451,15 +663,15 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       
       const randomResponse = responses[Math.floor(Math.random() * responses.length)];
       
-      const adminResponse = {
+      const doctorResponse = {
         id: messages.length + 2,
-        sender: selectedAdmin.name,
+        sender: selectedDoctor.name,
         message: randomResponse,
         timestamp: new Date().toLocaleTimeString(),
         isAdmin: true
       };
       
-      setMessages(prev => [...prev, adminResponse]);
+      setMessages(prev => [...prev, doctorResponse]);
     }, 2000);
   };
 
@@ -498,7 +710,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
   };
 
   const submitMedicineRequest = () => {
-    if (!requestForm.medicineName || !requestForm.quantity || !requestForm.reason) {
+    if (!requestForm.medicineName || !requestForm.quantity) {
       alert("Please fill in all required fields");
       return;
     }
@@ -508,7 +720,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       medicineName: requestForm.medicineName,
       quantity: parseInt(requestForm.quantity),
       urgency: requestForm.urgency,
-      reason: requestForm.reason,
+      reason: "", // Keep this for backward compatibility but set it to empty string
       currentStock: parseInt(requestForm.currentStock) || 0,
       requestDate: new Date().toLocaleDateString(),
       status: "pending",
@@ -522,12 +734,11 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       medicineName: "",
       quantity: "",
       urgency: "normal",
-      reason: "",
       currentStock: ""
     });
     
     setInventoryRequestDialog(false);
-    alert("Medicine request sent to admin successfully!");
+    alert("Medicine request sent to doctor successfully!");
   };
 
   // Patient Registration Functions
@@ -558,7 +769,11 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
     const newPatient = {
       name: registrationForm.name,
       age: parseInt(registrationForm.age),
-      appointment: getCurrentAppointmentTime(),
+      appointment: registrationForm.noSpecificRequirements 
+        ? "Next available slot" 
+        : (registrationForm.preferredDate && registrationForm.preferredTime)
+        ? `${registrationForm.preferredDate} at ${registrationForm.preferredTime}`
+        : "No preference",
       type: "New Registration",
       condition: registrationForm.condition,
       patientId: generatePatientId(),
@@ -575,10 +790,33 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       },
       gender: registrationForm.gender,
       symptoms: registrationForm.symptoms,
-      emergencyContact: registrationForm.emergencyContact
+      emergencyContact: registrationForm.emergencyContact,
+      appointmentSlot: registrationForm.noSpecificRequirements 
+        ? "Next available slot" 
+        : (registrationForm.preferredDate && registrationForm.preferredTime)
+        ? `${registrationForm.preferredDate} at ${registrationForm.preferredTime}`
+        : "No preference",
+      paymentStatus: registrationForm.paymentStatus // Include payment status
     };
 
     setRegisteredPatients(prev => [newPatient, ...prev]);
+    
+    // If payment is done, add to bookings for tracking
+    if (registrationForm.paymentStatus === "confirmed") {
+      const newBooking: Booking = {
+        id: `booking_${Date.now()}`,
+        patientName: registrationForm.name,
+        doctorName: "General Consultation",
+        doctorId: "general",
+        date: new Date().toISOString().split('T')[0],
+        time: registrationForm.preferredTime || "Immediate",
+        amount: 100,
+        paymentStatus: "confirmed",
+        bookingStatus: "completed",
+        createdAt: new Date()
+      };
+      setBookings(prev => [...prev, newBooking]);
+    }
     
     // Reset form
     setRegistrationForm({
@@ -595,7 +833,11 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       bloodPressure: "",
       heartRate: "",
       temperature: "",
-      weight: ""
+      weight: "",
+      preferredDate: "",
+      preferredTime: "",
+      noSpecificRequirements: false,
+      paymentStatus: "pending"
     });
     
     setPatientRegistrationDialog(false);
@@ -694,7 +936,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                     onClick={() => requestConsultation(patient)}
                   >
                     <Video className="w-3 h-3 mr-1" />
-                    {patient.priority === "Critical" ? "Start Emergency Call" : "Request Consultation"}
+                    Request Consultation
                   </Button>
                 </div>
               </div>
@@ -703,6 +945,201 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
         </Card>
 
         <div className="grid lg:grid-cols-3 gap-6">
+          {/* Booking System */}
+          <Card className="lg:col-span-1">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <CreditCard className="w-5 h-5 text-blue-600" />
+                  <span>Bookings & Payments</span>
+                </div>
+                <Dialog open={bookingDialog} onOpenChange={setBookingDialog}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="outline">
+                      <Plus className="w-3 h-3 mr-1" />
+                      New Booking
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle>Create New Booking</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div>
+                        <Label htmlFor="patientName">Patient Name *</Label>
+                        <Input
+                          id="patientName"
+                          value={bookingForm.patientName}
+                          onChange={(e) => setBookingForm({...bookingForm, patientName: e.target.value})}
+                          placeholder="Enter patient name"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="doctor">Doctor *</Label>
+                        <Select onValueChange={handleDoctorSelect}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a doctor" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {availableDoctors.map((doctor) => (
+                              <SelectItem key={doctor.id} value={doctor.id}>
+                                {doctor.name} - {doctor.specialty}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="date">Date *</Label>
+                          <Input
+                            id="date"
+                            type="date"
+                            value={bookingForm.date}
+                            onChange={(e) => setBookingForm({...bookingForm, date: e.target.value})}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="time">Time *</Label>
+                          <Select onValueChange={(value) => setBookingForm({...bookingForm, time: value})}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select time" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {timeSlots.map((slot) => (
+                                <SelectItem key={slot} value={slot}>
+                                  {slot}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor="amount">Amount (₹) *</Label>
+                        <div className="relative">
+                          <IndianRupee className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                          <Input
+                            id="amount"
+                            type="number"
+                            className="pl-10"
+                            value="100"
+                            readOnly
+                          />
+                          <input
+                            type="hidden"
+                            value="100"
+                            onChange={(e) => setBookingForm({...bookingForm, amount: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button variant="outline" onClick={() => setBookingDialog(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleBookingSubmit}>
+                        <Send className="w-4 h-4 mr-1" />
+                        Submit Booking
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Debug: Show all bookings and today's bookings count */}
+              {/* <div className="mb-4 p-2 bg-yellow-100 text-yellow-800 text-xs">
+                Total bookings: {bookings.length}, Today's bookings: {todaysBookings.length}
+              </div> */}
+              <div className="space-y-3">
+                {todaysBookings.map((booking) => (
+                  <div key={booking.id} className="p-3 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-foreground">{booking.patientName}</h4>
+                      <Badge 
+                        variant={booking.bookingStatus === "completed" ? "default" : booking.bookingStatus === "confirmed" ? "secondary" : "outline"}
+                        className="text-xs"
+                      >
+                        {booking.bookingStatus}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                      <span>Doctor: {booking.doctorName}</span>
+                      <span>Time: {booking.time}</span>
+                      <span>Amount: ₹{booking.amount}</span>
+                      <span>Payment: 
+                        <Badge 
+                          variant={booking.paymentStatus === "confirmed" ? "default" : "destructive"}
+                          className="ml-1 text-xs"
+                        >
+                          {booking.paymentStatus}
+                        </Badge>
+                      </span>
+                    </div>
+                    <div className="flex space-x-2 mt-2">
+                      {booking.paymentStatus === "pending" && (
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="text-xs"
+                          onClick={() => confirmPayment(booking.id)}
+                        >
+                          Confirm Payment
+                        </Button>
+                      )}
+                      {booking.bookingStatus !== "completed" && booking.paymentStatus === "confirmed" && (
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="text-xs"
+                          onClick={() => completeBooking(booking.id)}
+                        >
+                          Mark Completed
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                
+                {todaysBookings.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No bookings for today
+                  </p>
+                )}
+              </div>
+              
+              <div className="pt-4 border-t">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium">Total Collected Today:</span>
+                  <span className="font-bold text-lg">₹{totalAmountCollected}</span>
+                </div>
+                
+                {/* Doctor Collection Summary */}
+                <div className="mt-4 pt-4 border-t">
+                  <h4 className="font-medium mb-2">Doctor Collection Summary:</h4>
+                  <div className="space-y-2">
+                    {availableDoctors.map(doctor => {
+                      const doctorBookings = todaysBookings.filter(booking => 
+                        booking.doctorId === doctor.id && 
+                        booking.paymentStatus === "confirmed" && 
+                        booking.bookingStatus === "completed"
+                      );
+                      const doctorTotal = doctorBookings.reduce((sum, booking) => sum + booking.amount, 0);
+                      
+                      return (
+                        <div key={doctor.id} className="flex justify-between text-sm">
+                          <span>{doctor.name}:</span>
+                          <span className="font-medium">₹{doctorTotal}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
           {/* Medicine Inventory */}
           <Card className="lg:col-span-1">
             <CardHeader>
@@ -836,7 +1273,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                 </DialogTrigger>
                 <DialogContent className="max-w-md">
                   <DialogHeader>
-                    <DialogTitle>Request Medicine from Admin</DialogTitle>
+                    <DialogTitle>Request Medicine from Doctor</DialogTitle>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
                     <div>
@@ -883,16 +1320,6 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                         <option value="emergency">Emergency</option>
                       </select>
                     </div>
-                    <div>
-                      <Label htmlFor="reason">Reason for Request *</Label>
-                      <Textarea
-                        id="reason"
-                        value={requestForm.reason}
-                        onChange={(e) => setRequestForm({...requestForm, reason: e.target.value})}
-                        placeholder="Explain why this medicine is needed"
-                        rows={3}
-                      />
-                    </div>
                   </div>
                   <div className="flex justify-end space-x-2">
                     <Button variant="outline" onClick={() => setInventoryRequestDialog(false)}>
@@ -907,6 +1334,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
               </Dialog>
             </CardContent>
           </Card>
+          
           {/* Today's Patients */}
           <Card className="lg:col-span-1">
             <CardHeader>
@@ -928,9 +1356,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                       <h4 className="font-medium text-foreground">{patient.name}, {patient.age}</h4>
                       <div className="flex items-center space-x-2 text-xs text-muted-foreground">
                         <Clock className="w-3 h-3" />
-                        <span>{patient.appointment}</span>
-                        <span>•</span>
-                        <span>{patient.type}</span>
+                        <span>{patient.appointmentSlot || patient.appointment || "No appointment slot set"}</span>
                       </div>
                       <p className="text-xs text-muted-foreground">{patient.condition}</p>
                     </div>
@@ -1115,6 +1541,91 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                         </div>
                       </div>
                     </div>
+
+                    {/* Appointment Slot */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold text-foreground border-b pb-2">Preferred Appointment Slot</h3>
+                      <div className="flex items-center space-x-2 mb-4">
+                        <input
+                          type="checkbox"
+                          id="noRequirements"
+                          checked={registrationForm.noSpecificRequirements}
+                          onChange={(e) => setRegistrationForm({
+                            ...registrationForm, 
+                            noSpecificRequirements: e.target.checked,
+                            preferredDate: "",
+                            preferredTime: ""
+                          })}
+                          className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                        />
+                        <Label htmlFor="noRequirements" className="text-sm">
+                          No specific date/time requirements
+                        </Label>
+                      </div>
+                      
+                      {!registrationForm.noSpecificRequirements && (
+                        <div className="grid md:grid-cols-2 gap-4">
+                          <div>
+                            <Label htmlFor="preferredDate">Preferred Date</Label>
+                            <Input
+                              id="preferredDate"
+                              type="date"
+                              value={registrationForm.preferredDate}
+                              onChange={(e) => setRegistrationForm({...registrationForm, preferredDate: e.target.value})}
+                              min={new Date().toISOString().split('T')[0]}
+                              className="w-full"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor="preferredTime">Preferred Time</Label>
+                            <Input
+                              id="preferredTime"
+                              type="time"
+                              value={registrationForm.preferredTime}
+                              onChange={(e) => setRegistrationForm({...registrationForm, preferredTime: e.target.value})}
+                              className="w-full"
+                            />
+                          </div>
+                        </div>
+                      )}
+                      
+                      {registrationForm.noSpecificRequirements && (
+                        <div className="bg-blue-50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800">
+                          <p className="text-sm text-blue-700 dark:text-blue-300">
+                            <strong>Note:</strong> Patient will be scheduled for the next available slot based on doctor availability.
+                          </p>
+                        </div>
+                      )}
+                      
+                      {/* Payment Status Section */}
+                      <div className="border-t pt-4">
+                        <h4 className="font-medium text-foreground mb-3">Payment Status</h4>
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="radio"
+                              id="paymentPending"
+                              name="paymentStatus"
+                              checked={registrationForm.paymentStatus === "pending"}
+                              onChange={() => setRegistrationForm({...registrationForm, paymentStatus: "pending"})}
+                              className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
+                            />
+                            <Label htmlFor="paymentPending" className="text-sm">Payment Pending</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <input
+                              type="radio"
+                              id="paymentDone"
+                              name="paymentStatus"
+                              checked={registrationForm.paymentStatus === "confirmed"}
+                              onChange={() => setRegistrationForm({...registrationForm, paymentStatus: "confirmed"})}
+                              className="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
+                            />
+                            <Label htmlFor="paymentDone" className="text-sm">Payment Done</Label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                   <div className="flex justify-end space-x-2 pt-4 border-t">
                     <Button variant="outline" onClick={() => setPatientRegistrationDialog(false)}>
@@ -1130,42 +1641,42 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
             </CardContent>
           </Card>
 
-          {/* Available Admins */}
+          {/* Available Doctors */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Stethoscope className="w-5 h-5 text-blue-600" />
-                <span>Available Admins</span>
+                <span>Available Doctors</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {availableAdmins.map((specialist, index) => (
+              {availableDoctors.map((doctor, index) => (
                 <div key={index} className="p-3 border rounded-lg">
                   <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-foreground text-sm">{specialist.name}</h4>
+                    <h4 className="font-medium text-foreground text-sm">{doctor.name}</h4>
                     <Badge 
-                      variant={specialist.status === "Available" ? "default" : "secondary"}
+                      variant={doctor.status === "Available" ? "default" : "secondary"}
                       className="text-xs"
                     >
-                      {specialist.status}
+                      {doctor.status}
                     </Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground">{specialist.specialty}</p>
-                  <p className="text-xs text-muted-foreground">{specialist.hospital}</p>
+                  <p className="text-xs text-muted-foreground">{doctor.specialty}</p>
+                  <p className="text-xs text-muted-foreground">{doctor.hospital}</p>
                   <div className="flex items-center space-x-1 mt-2">
                     <Clock className="w-3 h-3 text-primary" />
-                    <span className="text-xs text-primary">{specialist.responseTime}</span>
+                    <span className="text-xs text-primary">{doctor.responseTime}</span>
                   </div>
-                  {specialist.status === "Available" ? (
+                  {doctor.status === "Available" ? (
                     <div className="flex flex-col space-y-1 mt-2">
                       <Button 
                         size="sm" 
                         className="w-full" 
                         variant="outline"
-                        onClick={() => startChat(specialist)}
+                        onClick={() => startChat(doctor)}
                       >
                         <MessageCircle className="w-3 h-3 mr-1" />
-                        Chat with Admin
+                        Chat with Doctor
                       </Button>
                       <Button 
                         size="sm" 
@@ -1176,7 +1687,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                             patient: {
                               name: "Direct Consultation",
                               age: 0,
-                              condition: "Direct specialist consultation",
+                              condition: "Direct doctor consultation",
                               time: "Now",
                               urgent: false,
                               symptoms: "Direct consultation request"
@@ -1185,13 +1696,13 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                         }}
                       >
                         <Video className="w-3 h-3 mr-1" />
-                        Video Call with Admin
+                        Video Call with Doctor
                       </Button>
                     </div>
                   ) : (
                     <Button size="sm" className="w-full mt-2" variant="outline" disabled>
                       <MessageCircle className="w-3 h-3 mr-1" />
-                      Admin Busy
+                      Doctor Busy
                     </Button>
                   )}
                 </div>
@@ -1210,13 +1721,104 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                     <Video className="w-6 h-6" />
                   </div>
                   <h3 className="font-semibold text-foreground mb-1">Request Consultation</h3>
-                  <p className="text-xs text-muted-foreground">Connect with admins</p>
+                  <p className="text-xs text-muted-foreground">Connect with doctors</p>
                 </CardContent>
               </Card>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Request Admin Consultation</DialogTitle>
+                <DialogTitle>Request Doctor Consultation</DialogTitle>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="patientName">Patient Name *</Label>
+                    <Input
+                      id="patientName"
+                      value={consultationRequest.patientName}
+                      onChange={(e) => setConsultationRequest({...consultationRequest, patientName: e.target.value})}
+                      placeholder="Enter patient name"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="age">Age</Label>
+                    <Input
+                      id="age"
+                      type="number"
+                      value={consultationRequest.age}
+                      onChange={(e) => setConsultationRequest({...consultationRequest, age: e.target.value})}
+                      placeholder="Patient age"
+                    />
+                  </div>
+                </div>
+                <div>
+                  <Label htmlFor="condition">Primary Condition/Complaint *</Label>
+                  <Input
+                    id="condition"
+                    value={consultationRequest.condition}
+                    onChange={(e) => setConsultationRequest({...consultationRequest, condition: e.target.value})}
+                    placeholder="e.g., Chest pain, Shortness of breath"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="symptoms">Symptoms & Duration</Label>
+                  <Textarea
+                    id="symptoms"
+                    value={consultationRequest.symptoms}
+                    onChange={(e) => setConsultationRequest({...consultationRequest, symptoms: e.target.value})}
+                    placeholder="Describe symptoms, when they started, severity, etc."
+                    className="min-h-20"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="vitals">Current Vitals</Label>
+                  <Input
+                    id="vitals"
+                    value={consultationRequest.vitals}
+                    onChange={(e) => setConsultationRequest({...consultationRequest, vitals: e.target.value})}
+                    placeholder="e.g., BP: 120/80, HR: 72 bpm, Temp: 98.6°F, Weight: 65 kg"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="urgency">Urgency Level</Label>
+                  <select 
+                    id="urgency"
+                    value={consultationRequest.urgency}
+                    onChange={(e) => setConsultationRequest({...consultationRequest, urgency: e.target.value})}
+                    className="w-full p-2 border rounded-md bg-background"
+                  >
+                    <option value="normal">Normal</option>
+                    <option value="urgent">Urgent</option>
+                    <option value="emergency">Emergency</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={() => setConsultationDialog(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleConsultationSubmit} disabled={isSubmittingRequest}>
+                  <Send className="w-4 h-4 mr-1" />
+                  Submit Request
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Dialog open={emergencyDialog} onOpenChange={setEmergencyDialog}>
+            <DialogTrigger asChild>
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
+                <CardContent className="p-6 text-center">
+                  <div className="p-3 rounded-full bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 mx-auto mb-3 w-fit">
+                    <AlertTriangle className="w-6 h-6" />
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-1">Emergency Consultation</h3>
+                  <p className="text-xs text-muted-foreground">Immediate medical attention</p>
+                </CardContent>
+              </Card>
+            </DialogTrigger>
+            <DialogContent className="max-w-2xl">
+              <DialogHeader>
+                <DialogTitle>Request Emergency Consultation</DialogTitle>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -1315,7 +1917,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                     <AlertTriangle className="w-6 h-6" />
                   </div>
                   <h3 className="font-semibold text-foreground mb-1">Emergency</h3>
-                  <p className="text-xs text-muted-foreground">Immediate specialist help</p>
+                  <p className="text-xs text-muted-foreground">Immediate doctor help</p>
                 </CardContent>
               </Card>
             </DialogTrigger>
@@ -1328,15 +1930,15 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
               </DialogHeader>
               <div className="py-4">
                 <p className="text-muted-foreground mb-4">
-                  This will initiate an immediate emergency consultation request with available specialists.
+                  This will initiate an immediate emergency consultation request with available doctors.
                 </p>
                 <div className="bg-red-50 dark:bg-red-950/20 p-4 rounded-lg border border-red-200 dark:border-red-800">
                   <h4 className="font-semibold text-red-700 dark:text-red-400 mb-2">Emergency Protocol:</h4>
                   <ul className="text-sm text-red-600 dark:text-red-400 space-y-1">
-                    <li>• Patient will be connected to next available specialist</li>
+                    <li>• Patient will be connected to next available doctor</li>
                     <li>• All vital signs should be ready</li>
-                    <li>• Have patient's medical history available</li>
-                    <li>• Ensure stable internet connection for video call</li>
+                    <li>Have patient's medical history available</li>
+                    <li>Ensure stable internet connection for video call</li>
                   </ul>
                 </div>
               </div>
@@ -1446,7 +2048,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                   <p>Patients Registered: {registeredPatients.length}</p>
                   <p>Consultations: 8</p>
                   <p>Emergency Cases: {emergencyPatients.length}</p>
-                  <p>Admins Connected: 3</p>
+                  <p>Doctors Connected: 3</p>
                 </div>
               </div>
             </div>
@@ -1460,13 +2062,13 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
               <DialogTitle className="flex items-center space-x-3">
                 <Avatar className="w-8 h-8">
                   <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                    {selectedAdmin?.avatar}
+                    {selectedDoctor?.avatar}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <span>Chat with {selectedAdmin?.name}</span>
+                  <span>Chat with {selectedDoctor?.name}</span>
                   <div className="text-sm text-muted-foreground font-normal">
-                    {selectedAdmin?.specialty} • {selectedAdmin?.hospital}
+                    {selectedDoctor?.specialty} • {selectedDoctor?.hospital}
                     <div className="flex items-center space-x-1 mt-1">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       <span className="text-xs">Online</span>
@@ -1507,7 +2109,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
             {/* Chat Input */}
             <div className="flex items-center space-x-2 mt-4">
               <Input
-                placeholder="Type your message to the admin..."
+                placeholder="Type your message to the doctor..."
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
@@ -1566,6 +2168,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                               <p><strong>Address:</strong> {patient.address}</p>
                               <p><strong>Last Visit:</strong> {patient.lastVisit}</p>
                               <p><strong>Allergies:</strong> {patient.allergies}</p>
+                              <p><strong>Appointment Slot:</strong> {patient.appointmentSlot || patient.appointment || "No preference set"}</p>
                             </div>
                           </div>
                           
@@ -1603,10 +2206,6 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                           >
                             <Video className="w-3 h-3 mr-1" />
                             Request Consultation
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            <FileText className="w-3 h-3 mr-1" />
-                            Full History
                           </Button>
                         </div>
                       </div>

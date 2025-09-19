@@ -1,3 +1,4 @@
+import vaidhyaSetuLogo from "@/assets/vaidhya-setu-logo.png";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,6 @@ import {
   Stethoscope, 
   Building2, 
   UserCheck, 
-  Heart, 
   Activity,
   MapPin,
   Phone,
@@ -24,8 +24,8 @@ const PortalSelection = ({ onPortalSelect }: PortalSelectionProps) => {
   const portals = [
     {
       id: "specialist",
-      title: "Admin Portal",
-      description: "Urban cardiac specialists providing remote consultations to rural patients",
+      title: "Doctor Portal",
+      description: "General doctors providing remote consultations to rural patients",
       icon: Stethoscope,
       color: "bg-blue-500",
       features: [
@@ -35,17 +35,17 @@ const PortalSelection = ({ onPortalSelect }: PortalSelectionProps) => {
         "Rural health center communication",
         "Appointment scheduling and management"
       ],
-      userTypes: ["Administrators", "System Managers", "Platform Operators"],
+      userTypes: ["General Doctors", "Medical Officers", "Healthcare Providers"],
       bgGradient: "from-blue-600 to-blue-800"
     },
     {
       id: "rural-center",
       title: "Rural Health Center Portal",
-      description: "Primary health centers connecting patients with urban specialists",
+      description: "Primary health centers connecting patients with urban general doctors",
       icon: Building2,
       color: "bg-green-500",
       features: [
-        "Request specialist consultations",
+        "Request general doctor consultations",
         "Patient registration and basic records",
         "Vital signs monitoring and reporting",
         "Emergency consultation requests",
@@ -76,9 +76,11 @@ const PortalSelection = ({ onPortalSelect }: PortalSelectionProps) => {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center space-x-3 mb-6">
-            <div className="p-3 rounded-full bg-primary/10 text-primary">
-              <Heart className="w-8 h-8" />
-            </div>
+            <img 
+              src={vaidhyaSetuLogo} 
+              alt="Vaidhya Setu Logo" 
+              className="h-16 w-auto"
+            />
             <h1 className="text-4xl font-bold text-foreground">Vaidhya Setu</h1>
           </div>
           <p className="text-xl text-muted-foreground mb-2">
@@ -86,7 +88,7 @@ const PortalSelection = ({ onPortalSelect }: PortalSelectionProps) => {
           </p>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Choose your portal to access the comprehensive telemedicine platform connecting 
-            urban specialists with rural healthcare centers across India
+            urban general doctors with rural healthcare centers across India
           </p>
         </div>
 
@@ -202,7 +204,7 @@ const PortalSelection = ({ onPortalSelect }: PortalSelectionProps) => {
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            Powered by advanced telemedicine technology • Connecting specialists with rural healthcare
+            Powered by Medivine • Connecting general doctors with rural healthcare
           </p>
         </div>
       </div>

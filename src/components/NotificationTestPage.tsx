@@ -44,7 +44,7 @@ export const NotificationTestPage: React.FC = () => {
     patientName: 'John Doe',
     symptoms: 'Chest pain and shortness of breath',
     urgency: 'urgent' as 'normal' | 'urgent' | 'emergency',
-    doctorId: 'doctor_specialist_001',
+    doctorId: 'doctor_general_001',
     healthCenterId: 'health_center_rajasthan_001',
     healthCenterName: 'Rural Health Center - Rajasthan'
   });
@@ -59,7 +59,7 @@ export const NotificationTestPage: React.FC = () => {
       const patientData = {
         name: testConfig.patientName,
         age: 35,
-        contact: '+91 98765 43210',
+        contact: '+91 97049 15150',
         address: 'Village Test, Rajasthan',
         medicalHistory: 'Test patient for notification system',
         allergies: 'None'
@@ -233,7 +233,7 @@ The doctor should receive a real-time notification now.`);
                 <div className="ml-auto">
                   <RealTimeNotificationDropdown
                     userId={testConfig.doctorId}
-                    userRole="admin"
+                    userRole="doctor"
                     userName="Admin Test"
                   />
                 </div>

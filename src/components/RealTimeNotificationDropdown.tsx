@@ -115,6 +115,14 @@ const RealTimeNotificationDropdown: React.FC<RealTimeNotificationDropdownProps> 
         patientName: selectedRequest.data?.patientName || 'Patient'
       });
       
+      // Show browser notification
+      if (typeof window !== 'undefined' && 'Notification' in window) {
+        new Notification('Consultation Accepted', {
+          body: `You have accepted the consultation request for ${selectedRequest.data?.patientName}. The video call is ready to start.`,
+          icon: '/logo.png'
+        });
+      }
+      
       setIsRequestDialogOpen(false);
       setSelectedRequest(null);
       
@@ -125,6 +133,13 @@ const RealTimeNotificationDropdown: React.FC<RealTimeNotificationDropdownProps> 
       
     } catch (error) {
       console.error('Error accepting request:', error);
+      // Show error notification
+      if (typeof window !== 'undefined' && 'Notification' in window) {
+        new Notification('Error', {
+          body: 'Failed to accept the consultation request. Please try again.',
+          icon: '/logo.png'
+        });
+      }
     } finally {
       setIsProcessing(false);
     }
