@@ -15,7 +15,8 @@ import {
   Timestamp,
   FieldValue
 } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, messaging } from '@/lib/firebase';
+import { isSupported, getToken } from 'firebase/messaging';
 
 // Notification types
 export type NotificationType = 
@@ -54,6 +55,34 @@ export interface Notification {
 const notificationsCollection = collection(db, 'notifications');
 
 /**
+ * Send a push notification using Firebase Messaging
+ */
+async function sendPushNotification(notification: Omit<Notification, 'id'>): Promise<void> {
+  // Only send push notifications in browser environment
+  if (typeof window === 'undefined' || !messaging) {
+    return;
+  }
+
+  try {
+    // Check if Firebase Messaging is supported
+    if (!(await isSupported())) {
+      console.warn('Firebase Messaging is not supported in this browser');
+      return;
+    }
+
+    // In a real application, you would send this to your server
+    // which would then use the FCM HTTP API to send the push notification
+    console.log('Would send push notification:', notification.title, notification.message);
+    
+    // For demonstration purposes, we're just logging
+    // In a real implementation, this would make an API call to your backend
+    // which would then send the push notification via FCM
+  } catch (error) {
+    console.error('Error sending push notification:', error);
+  }
+}
+
+/**
  * Send a notification to a user
  */
 export const sendNotification = async (
@@ -69,6 +98,10 @@ export const sendNotification = async (
 
     const docRef = await addDoc(notificationsCollection, notification);
     console.log('Notification sent:', docRef.id);
+    
+    // Send push notification
+    await sendPushNotification(notification);
+    
     return docRef.id;
   } catch (error) {
     console.error('Error sending notification:', error);

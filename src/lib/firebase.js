@@ -4,6 +4,7 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAnalytics } from 'firebase/analytics';
+import { getMessaging } from 'firebase/messaging';
 
 // Firebase configuration object using Vite environment variables
 const firebaseConfig = {
@@ -30,6 +31,13 @@ if (typeof window !== 'undefined') {
   analytics = getAnalytics(app);
 }
 
+// Initialize Messaging (only in browser environment)
+let messaging = null;
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  // Messaging requires service worker support
+  messaging = getMessaging(app);
+}
+
 // Export services for use across telemedicine platform
-export { auth, db, storage, analytics };
+export { auth, db, storage, analytics, messaging };
 export default app;
