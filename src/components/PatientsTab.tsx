@@ -7,7 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Users, Heart, Calendar, FileText, Activity, Pill, TestTube, User, Stethoscope, Eye } from "lucide-react";
 
-const PatientsTab = () => {
+interface PatientsTabProps {
+  searchQuery?: string;
+}
+
+const PatientsTab = ({ searchQuery = "" }: PatientsTabProps) => {
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
 
   const patients = [
@@ -67,6 +71,13 @@ const PatientsTab = () => {
     }
   ];
 
+  // Filter patients based on search query
+  const filteredPatients = patients.filter(patient => 
+    patient.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    patient.condition.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    patient.status.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Active Treatment": return "bg-destructive/10 text-destructive";
@@ -88,12 +99,12 @@ const PatientsTab = () => {
         </div>
         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
           <Heart className="w-4 h-4" />
-          <span>{patients.length} Cardiology Patients</span>
+          <span>{filteredPatients.length} Cardiology Patients</span>
         </div>
       </div>
 
       <div className="grid md:grid-cols-2 gap-4">
-        {patients.map((patient, index) => (
+        {filteredPatients.map((patient, index) => (
           <Card 
             key={index} 
             className="glass-card shadow-medical hover:shadow-lg transition-all duration-300"

@@ -2,7 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Pill, Calendar, User, FileText, Heart } from "lucide-react";
 
-const PrescriptionsTab = () => {
+interface PrescriptionsTabProps {
+  searchQuery?: string;
+}
+
+const PrescriptionsTab = ({ searchQuery = "" }: PrescriptionsTabProps) => {
   const prescriptions = [
     {
       patient: "Rajesh Kumar",
@@ -63,6 +67,12 @@ const PrescriptionsTab = () => {
     }
   ];
 
+  // Filter prescriptions based on search query
+  const filteredPrescriptions = prescriptions.filter(prescription => 
+    prescription.patient.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    prescription.condition.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex items-center justify-between">
@@ -77,7 +87,7 @@ const PrescriptionsTab = () => {
       </div>
 
       <div className="space-y-6">
-        {prescriptions.map((prescription, index) => (
+        {filteredPrescriptions.map((prescription, index) => (
           <Card 
             key={index} 
             className="glass-card shadow-medical hover:shadow-lg transition-all duration-300"

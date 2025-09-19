@@ -45,7 +45,7 @@ const App = () => {
 
   const renderPortalContent = () => {
     if (!isLoggedIn) {
-      return <Login onLogin={handleLogin} />;
+      return <Login onLogin={handleLogin} onBack={() => setSelectedPortal("")} />;
     }
 
     switch (selectedPortal) {
@@ -54,7 +54,7 @@ const App = () => {
       case "rural-center":
         return (
           <RuralCenterDashboard 
-            centerName="Rural Health Center - Rajasthan" 
+            centerName="Rural Health Center - Andhra Pradesh" 
             onLogout={handleLogout}
           />
         );

@@ -14,9 +14,10 @@ import {
   Pill,
   Clock,
   Activity,
-  Star
+  Star,
+  Home,
+  ArrowLeft
 } from "lucide-react";
-import { DarkModeToggle } from "./DarkModeToggle";
 import RealTimeNotificationDropdown from "./RealTimeNotificationDropdown";
 import AppointmentsTab from "./AppointmentsTab";
 import PatientsTab from "./PatientsTab";
@@ -39,9 +40,9 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
     patient: any;
   }>({ isOpen: false, patient: null });
   
-  // Doctor configuration - in real app this would come from authentication
-  const doctorId = "doctor_specialist_001";
-  const doctorName = `Dr. ${userName}`;
+  // Admin configuration - in real app this would come from authentication
+  const doctorId = "admin_001";
+  const doctorName = `Admin ${userName}`;
 
   const quickActions = [
     { name: "Appointments", icon: Calendar, color: "bg-medical-blue/10 text-medical-blue", key: "appointments" },
@@ -138,7 +139,7 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
             
             <RealTimeNotificationDropdown 
               userId={doctorId}
-              userRole="doctor"
+              userRole="admin"
               userName={doctorName}
             />
             
@@ -160,10 +161,20 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
               <User className="w-5 h-5" />
             </Button>
             
-            <DarkModeToggle />
+            {/* Back to Portal Selection Button - Desktop */}
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={onLogout}
+              className="hidden md:flex items-center space-x-1"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Portal Selection</span>
+            </Button>
             
+            {/* Logout Button */}
             {onLogout && (
-              <Button variant="outline" onClick={onLogout}>
+              <Button variant="outline" onClick={onLogout} className="md:hidden">
                 Logout
               </Button>
             )}
@@ -180,7 +191,7 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h1 className="text-2xl font-bold text-foreground mb-2">
-                      Welcome back, Dr. {userName}!
+                      Welcome back, Admin {userName}!
                     </h1>
                     <p className="text-muted-foreground">
                       You have <span className="font-semibold text-primary">5 appointments</span> scheduled for today.
@@ -269,7 +280,11 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
                       heartRate: "68 bpm",
                       symptoms: "Mild chest discomfort at incision site"
                     }
-                  ].map((appointment, index) => (
+                  ].filter(item => 
+                    item.patient.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    item.info.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    item.condition.toLowerCase().includes(searchQuery.toLowerCase())
+                  ).map((appointment, index) => (
                     <div
                       key={index}
                       className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors"
@@ -324,7 +339,9 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
                     { activity: "5-star feedback from Vikram Patel", time: "4 hours ago", type: "message" },
                     { activity: "ECG results uploaded for Rajesh Kumar", time: "6 hours ago", type: "results" },
                     { activity: "Cardiac medications sent to Rural Health Center", time: "1 day ago", type: "prescription" }
-                  ].map((activity, index) => (
+                  ].filter(activity => 
+                    activity.activity.toLowerCase().includes(searchQuery.toLowerCase())
+                  ).map((activity, index) => (
                     <div
                       key={index}
                       className="flex items-start space-x-3 p-3 rounded-lg bg-muted/50 hover:bg-muted/70 transition-colors"
@@ -348,11 +365,11 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
         )}
 
         {/* Tab Content */}
-        {activeTab === "appointments" && <AppointmentsTab />}
-        {activeTab === "patients" && <PatientsTab />}
-        {activeTab === "feedback" && <FeedbackTab />}
-        {activeTab === "prescriptions" && <PrescriptionsTab />}
-        {activeTab === "messages" && <MessagesTab />}
+        {activeTab === "appointments" && <AppointmentsTab searchQuery={searchQuery} />}
+        {activeTab === "patients" && <PatientsTab searchQuery={searchQuery} />}
+        {activeTab === "feedback" && <FeedbackTab searchQuery={searchQuery} />}
+        {activeTab === "prescriptions" && <PrescriptionsTab searchQuery={searchQuery} />}
+        {activeTab === "messages" && <MessagesTab searchQuery={searchQuery} />}
         {activeTab === "profile" && <ProfileTab userName={userName} />}
 
       </main>

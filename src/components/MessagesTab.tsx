@@ -7,7 +7,11 @@ import { Badge } from "@/components/ui/badge";
 import { MessageCircle, Send, MapPin, Clock, User, Heart, AlertCircle, Video } from "lucide-react";
 import VideoConsultation from "./VideoConsultation";
 
-const MessagesTab = () => {
+interface MessagesTabProps {
+  searchQuery?: string;
+}
+
+const MessagesTab = ({ searchQuery = "" }: MessagesTabProps) => {
   const [newMessage, setNewMessage] = useState("");
   const [selectedChat, setSelectedChat] = useState(0);
   const [videoConsultation, setVideoConsultation] = useState<{
@@ -49,6 +53,13 @@ const MessagesTab = () => {
       online: true
     }
   ];
+
+  // Filter health centers based on search query
+  const filteredHealthCenters = healthCenters.filter(center => 
+    center.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    center.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    center.lastMessage.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const conversations = [
     {
@@ -121,7 +132,7 @@ const MessagesTab = () => {
           </CardHeader>
           <CardContent className="p-0">
             <ScrollArea className="h-[500px]">
-              {healthCenters.map((center, index) => (
+              {filteredHealthCenters.map((center, index) => (
                 <div
                   key={index}
                   onClick={() => setSelectedChat(index)}
@@ -169,11 +180,11 @@ const MessagesTab = () => {
                   <MessageCircle className="w-4 h-4" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg">{healthCenters[selectedChat].name}</CardTitle>
+                  <CardTitle className="text-lg">{filteredHealthCenters[selectedChat]?.name || "Select a Health Center"}</CardTitle>
                   <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                     <MapPin className="w-3 h-3" />
-                    <span>{healthCenters[selectedChat].location}</span>
-                    {healthCenters[selectedChat].online && (
+                    <span>{filteredHealthCenters[selectedChat]?.location || ""}</span>
+                    {filteredHealthCenters[selectedChat]?.online && (
                       <div className="flex items-center space-x-1">
                         <div className="w-2 h-2 bg-success rounded-full"></div>
                         <span>Online</span>
@@ -208,7 +219,10 @@ const MessagesTab = () => {
             {/* Messages */}
             <ScrollArea className="flex-1 mb-4">
               <div className="space-y-4 p-2">
-                {conversations[selectedChat]?.messages.map((msg, index) => (
+                {conversations[selectedChat]?.messages.filter(msg => 
+                  msg.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  msg.sender.toLowerCase().includes(searchQuery.toLowerCase())
+                ).map((msg, index) => (
                   <div
                     key={index}
                     className={`flex ${msg.isDoctor ? 'justify-end' : 'justify-start'}`}

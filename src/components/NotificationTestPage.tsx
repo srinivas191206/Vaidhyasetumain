@@ -233,8 +233,8 @@ The doctor should receive a real-time notification now.`);
                 <div className="ml-auto">
                   <RealTimeNotificationDropdown
                     userId={testConfig.doctorId}
-                    userRole="doctor"
-                    userName="Dr. Test Specialist"
+                    userRole="admin"
+                    userName="Admin Test"
                   />
                 </div>
               </CardTitle>

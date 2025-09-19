@@ -95,7 +95,7 @@ const ProfileTab = ({ userName }: ProfileTabProps) => {
           <h2 className="text-2xl font-bold text-foreground">Professional Profile</h2>
         </div>
         <Badge variant="secondary" className="px-3 py-1">
-          Verified Specialist
+          Verified Admin
         </Badge>
       </div>
 

@@ -4,13 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Stethoscope } from "lucide-react";
+import { Stethoscope, ArrowLeft } from "lucide-react";
 
 interface LoginProps {
   onLogin: (name: string) => void;
+  onBack?: () => void;
 }
 
-const Login = ({ onLogin }: LoginProps) => {
+const Login = ({ onLogin, onBack }: LoginProps) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -50,7 +51,7 @@ const Login = ({ onLogin }: LoginProps) => {
               Vaidhya Setu
             </CardTitle>
             <CardDescription className="text-muted-foreground mt-2">
-              Specialist Login Portal
+              Admin Login Portal
             </CardDescription>
           </div>
         </CardHeader>
@@ -106,6 +107,19 @@ const Login = ({ onLogin }: LoginProps) => {
               Access Dashboard
             </Button>
           </form>
+          
+          {/* Back Button */}
+          <div className="mt-4 flex justify-center">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={onBack || (() => window.history.back())}
+              className="flex items-center space-x-1"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Portal Selection</span>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

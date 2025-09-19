@@ -2,7 +2,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Star, MessageCircle, ThumbsUp, Heart } from "lucide-react";
 
-const FeedbackTab = () => {
+interface FeedbackTabProps {
+  searchQuery?: string;
+}
+
+const FeedbackTab = ({ searchQuery = "" }: FeedbackTabProps) => {
   const feedbacks = [
     {
       patient: "Rajesh Kumar",
@@ -46,7 +50,16 @@ const FeedbackTab = () => {
     }
   ];
 
-  const averageRating = (feedbacks.reduce((sum, feedback) => sum + feedback.rating, 0) / feedbacks.length).toFixed(1);
+  // Filter feedbacks based on search query
+  const filteredFeedbacks = feedbacks.filter(feedback => 
+    feedback.patient.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    feedback.condition.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    feedback.comment.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const averageRating = filteredFeedbacks.length > 0 
+    ? (filteredFeedbacks.reduce((sum, feedback) => sum + feedback.rating, 0) / filteredFeedbacks.length).toFixed(1)
+    : "0.0";
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -71,7 +84,7 @@ const FeedbackTab = () => {
           </div>
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
             <ThumbsUp className="w-4 h-4" />
-            <span>{feedbacks.length} Total Reviews</span>
+            <span>{filteredFeedbacks.length} Total Reviews</span>
           </div>
         </div>
       </div>
@@ -89,7 +102,7 @@ const FeedbackTab = () => {
             </div>
             <div className="text-center">
               <Heart className="w-8 h-8 mx-auto mb-2 text-destructive" />
-              <p className="text-2xl font-bold text-foreground">{feedbacks.length}</p>
+              <p className="text-2xl font-bold text-foreground">{filteredFeedbacks.length}</p>
               <p className="text-sm text-muted-foreground">Happy Patients</p>
             </div>
             <div className="text-center">
@@ -103,7 +116,7 @@ const FeedbackTab = () => {
 
       {/* Individual Feedback Cards */}
       <div className="space-y-4">
-        {feedbacks.map((feedback, index) => (
+        {filteredFeedbacks.map((feedback, index) => (
           <Card 
             key={index} 
             className="glass-card shadow-medical hover:shadow-lg transition-all duration-300"

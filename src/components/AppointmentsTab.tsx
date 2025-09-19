@@ -10,7 +10,11 @@ import { CalendarIcon, Clock, User, Heart, Star, CheckCircle2, Eye, RotateCcw, C
 import { format, parseISO, differenceInMinutes, addDays, isBefore, isAfter, isToday, isTomorrow, isSameDay, getDay, isSameMonth, addWeeks, subWeeks, startOfMonth, endOfMonth } from "date-fns";
 import VideoConsultation from "./VideoConsultation";
 
-const AppointmentsTab = () => {
+interface AppointmentsTabProps {
+  searchQuery?: string;
+}
+
+const AppointmentsTab = ({ searchQuery = "" }: AppointmentsTabProps) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [rescheduleDialog, setRescheduleDialog] = useState<{ open: boolean; appointmentIndex: number }>({ open: false, appointmentIndex: -1 });
@@ -180,6 +184,13 @@ const AppointmentsTab = () => {
     }
   ];
 
+  // Filter appointments based on search query
+  const filteredAppointments = appointments.filter(apt => 
+    apt.patient.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    apt.condition.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    apt.type.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const getTimeStatus = (appointment: any) => {
     if (appointment.completed) return null;
     
@@ -213,15 +224,15 @@ const AppointmentsTab = () => {
     }
   };
 
-  const todayAppointments = appointments.filter(apt => isToday(parseISO(apt.date)));
-  const tomorrowAppointments = appointments.filter(apt => isTomorrow(parseISO(apt.date)));
+  const todayAppointments = filteredAppointments.filter(apt => isToday(parseISO(apt.date)));
+  const tomorrowAppointments = filteredAppointments.filter(apt => isTomorrow(parseISO(apt.date)));
 
   // Get appointments for selected calendar date
   const getAppointmentsForDate = (date: Date) => {
     if (isOffDay(date)) return [];
     
     // Check if we have predefined appointments for this date
-    const existingAppointments = appointments.filter(apt => isSameDay(parseISO(apt.date), date));
+    const existingAppointments = filteredAppointments.filter(apt => isSameDay(parseISO(apt.date), date));
     if (existingAppointments.length > 0) {
       return existingAppointments;
     }
@@ -236,7 +247,7 @@ const AppointmentsTab = () => {
 
   const selectedDateAppointments = calendarSelectedDate ? getAppointmentsForDate(calendarSelectedDate) : [];
 
-  const appointmentDates = [...new Set(appointments.map(apt => apt.date))];
+  const appointmentDates = [...new Set(filteredAppointments.map(apt => apt.date))];
   const markedDates = appointmentDates.map(date => parseISO(date));
   
   // Generate off days for the current month
@@ -579,13 +590,13 @@ const AppointmentsTab = () => {
               <div className="p-4 rounded-lg bg-muted/50">
                 <h4 className="font-semibold mb-2">Current Appointment</h4>
                 <p className="text-sm">
-                  <strong>Patient:</strong> {appointments[rescheduleDialog.appointmentIndex]?.patient}
+                  <strong>Patient:</strong> {filteredAppointments[rescheduleDialog.appointmentIndex]?.patient}
                 </p>
                 <p className="text-sm">
-                  <strong>Time:</strong> {appointments[rescheduleDialog.appointmentIndex]?.time}
+                  <strong>Time:</strong> {filteredAppointments[rescheduleDialog.appointmentIndex]?.time}
                 </p>
                 <p className="text-sm">
-                  <strong>Condition:</strong> {appointments[rescheduleDialog.appointmentIndex]?.condition}
+                  <strong>Condition:</strong> {filteredAppointments[rescheduleDialog.appointmentIndex]?.condition}
                 </p>
               </div>
             )}

@@ -24,7 +24,7 @@ const PortalSelection = ({ onPortalSelect }: PortalSelectionProps) => {
   const portals = [
     {
       id: "specialist",
-      title: "Specialist Doctor Portal",
+      title: "Admin Portal",
       description: "Urban cardiac specialists providing remote consultations to rural patients",
       icon: Stethoscope,
       color: "bg-blue-500",
@@ -35,7 +35,7 @@ const PortalSelection = ({ onPortalSelect }: PortalSelectionProps) => {
         "Rural health center communication",
         "Appointment scheduling and management"
       ],
-      userTypes: ["Cardiologists", "Cardiac Surgeons", "Specialist Physicians"],
+      userTypes: ["Administrators", "System Managers", "Platform Operators"],
       bgGradient: "from-blue-600 to-blue-800"
     },
     {

@@ -29,7 +29,9 @@ import {
   ShoppingCart,
   AlertCircle,
   CheckCircle,
-  Minus
+  Minus,
+  Home,
+  ArrowLeft
 } from "lucide-react";
 import VideoConsultation from "./VideoConsultation";
 import { 
@@ -58,7 +60,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
     patient: any;
   }>({ isOpen: false, patient: null });
   const [chatDialog, setChatDialog] = useState(false);
-  const [selectedSpecialist, setSelectedSpecialist] = useState<any>(null);
+  const [selectedAdmin, setSelectedAdmin] = useState<any>(null);
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
   
@@ -67,7 +69,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
   const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
   
   // Health Center configuration
-  const healthCenterId = "health_center_rajasthan_001";
+  const healthCenterId = "health_center_andhra_001";
   const healthCenterName = centerName;
   
   // Medicine Inventory State
@@ -102,41 +104,41 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
   });
   const [registeredPatients, setRegisteredPatients] = useState([
     {
-      name: "Sita Sharma",
-      age: 52,
-      appointment: "11:00 AM",
+      name: "Lakshmi Devi",
+      age: 48,
+      appointment: "10:30 AM",
       type: "Follow-up",
-      condition: "Hypertension",
+      condition: "Diabetes Management",
       patientId: "RHC001",
       phone: "+91 98765 43210",
-      address: "Village Kumarganj, Rajasthan",
-      medicalHistory: "Diagnosed with hypertension 2 years ago. Currently on Amlodipine 5mg.",
+      address: "Village Venkatagiri, Andhra Pradesh",
+      medicalHistory: "Diagnosed with Type 2 Diabetes 3 years ago. Currently on Metformin 500mg twice daily.",
       allergies: "None known",
-      lastVisit: "2024-08-15",
+      lastVisit: "2024-08-20",
       vitals: {
-        bloodPressure: "145/90",
-        heartRate: "78 bpm",
-        temperature: "98.4°F",
-        weight: "65 kg"
+        bloodPressure: "135/85",
+        heartRate: "76 bpm",
+        temperature: "98.2°F",
+        weight: "68 kg"
       }
     },
     {
-      name: "Gopal Singh",
-      age: 41,
-      appointment: "2:00 PM",
+      name: "Ravi Kumar",
+      age: 35,
+      appointment: "1:45 PM",
       type: "Initial Consultation",
-      condition: "Chest discomfort",
+      condition: "Hypertension",
       patientId: "RHC002",
       phone: "+91 97654 32109",
-      address: "Village Bharatpur, Rajasthan",
-      medicalHistory: "No significant past medical history. Family history of heart disease.",
-      allergies: "Penicillin",
+      address: "Village Tirupati, Andhra Pradesh",
+      medicalHistory: "No significant past medical history. Family history of hypertension.",
+      allergies: "Shellfish",
       lastVisit: "First visit",
       vitals: {
-        bloodPressure: "130/85",
-        heartRate: "85 bpm",
+        bloodPressure: "145/90",
+        heartRate: "82 bpm",
         temperature: "98.6°F",
-        weight: "72 kg"
+        weight: "75 kg"
       }
     }
   ]);
@@ -175,52 +177,52 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
 
   const emergencyPatients = [
     {
-      name: "Meera Devi",
-      age: 45,
+      name: "Saritha Devi",
+      age: 52,
       condition: "Severe chest pain",
-      vitals: "BP: 160/95, HR: 95 bpm",
-      time: "10 minutes ago",
+      vitals: "BP: 165/95, HR: 92 bpm",
+      time: "15 minutes ago",
       priority: "Critical"
     },
     {
-      name: "Ram Prasad",
-      age: 58,
+      name: "Krishna Rao",
+      age: 61,
       condition: "Shortness of breath",
-      vitals: "BP: 145/90, HR: 88 bpm",
-      time: "25 minutes ago",
+      vitals: "BP: 150/90, HR: 85 bpm",
+      time: "30 minutes ago",
       priority: "High"
     }
   ];
 
-  const availableSpecialists = [
+  const availableAdmins = [
     {
-      name: "Dr. Varun Sharma",
+      name: "Admin Suresh Reddy",
       specialty: "Cardiology",
       status: "Available",
-      hospital: "AIIMS Delhi",
+      hospital: "Apollo Hospitals, Hyderabad",
       responseTime: "< 5 minutes",
       id: "specialist1",
-      avatar: "VS",
+      avatar: "SR",
       online: true
     },
     {
-      name: "Dr. Priya Mehta",
+      name: "Admin Anitha Rao",
       specialty: "Cardiology",
       status: "In Consultation",
-      hospital: "Fortis Mumbai",
+      hospital: "Yashoda Hospitals, Hyderabad",
       responseTime: "15 minutes",
       id: "specialist2",
-      avatar: "PM",
+      avatar: "AR",
       online: true
     },
     {
-      name: "Dr. Rajesh Kumar",
+      name: "Admin Prakash Kumar",
       specialty: "Internal Medicine",
       status: "Available",
-      hospital: "SGPGI Lucknow",
+      hospital: "Care Hospitals, Visakhapatnam",
       responseTime: "< 3 minutes",
       id: "specialist3",
-      avatar: "RK",
+      avatar: "PK",
       online: true
     }
   ];
@@ -294,7 +296,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
         }
       });
     } else {
-      alert(`Consultation requested for ${patient.name}. Specialist will be notified.`);
+      alert(`Consultation requested for ${patient.name}. Admin will be notified.`);
     }
   };
 
@@ -307,7 +309,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
     // Validate doctor selection
     const doctorId = "doctor_specialist_001";
     if (!doctorId) {
-      alert("Please select a specialist doctor");
+      alert("Please select an admin");
       return;
     }
     
@@ -408,16 +410,16 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
     setConsultationDialog(true);
   };
 
-  const startChat = (specialist: any) => {
-    setSelectedSpecialist(specialist);
-    // Initialize chat with welcome message from specialist
+  const startChat = (admin: any) => {
+    setSelectedAdmin(admin);
+    // Initialize chat with welcome message from admin
     setMessages([
       {
         id: 1,
-        sender: specialist.name,
-        message: `Hello! This is ${specialist.name} from ${specialist.hospital}. How can I assist you today?`,
+        sender: admin.name,
+        message: `Hello! This is ${admin.name} from ${admin.hospital}. How can I assist you today?`,
         timestamp: new Date().toLocaleTimeString(),
-        isSpecialist: true
+        isAdmin: true
       }
     ]);
     setChatDialog(true);
@@ -431,13 +433,13 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       sender: "Rural Health Center",
       message: newMessage,
       timestamp: new Date().toLocaleTimeString(),
-      isSpecialist: false
+      isAdmin: false
     };
     
     setMessages(prev => [...prev, userMessage]);
     setNewMessage("");
     
-    // Simulate specialist response after 2 seconds
+    // Simulate admin response after 2 seconds
     setTimeout(() => {
       const responses = [
         "Thank you for sharing that information. Can you provide more details about the patient's symptoms?",
@@ -449,15 +451,15 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       
       const randomResponse = responses[Math.floor(Math.random() * responses.length)];
       
-      const specialistResponse = {
+      const adminResponse = {
         id: messages.length + 2,
-        sender: selectedSpecialist.name,
+        sender: selectedAdmin.name,
         message: randomResponse,
         timestamp: new Date().toLocaleTimeString(),
-        isSpecialist: true
+        isAdmin: true
       };
       
-      setMessages(prev => [...prev, specialistResponse]);
+      setMessages(prev => [...prev, adminResponse]);
     }, 2000);
   };
 
@@ -605,14 +607,38 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-full bg-green-500/10 text-green-600">
-              <Building2 className="w-6 h-6" />
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 rounded-full bg-green-500/10 text-green-600">
+                <Building2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-foreground">{centerName}</h1>
+                <p className="text-xs text-muted-foreground">Rural Health Center Portal</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-lg font-bold text-foreground">{centerName}</h1>
-              <p className="text-xs text-muted-foreground">Rural Health Center Portal</p>
-            </div>
+            
+            {/* Home Button */}
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => window.location.reload()}
+              className="flex items-center space-x-1"
+            >
+              <Home className="w-4 h-4" />
+              <span>Home</span>
+            </Button>
+            
+            {/* Back to Portal Selection Button - Desktop */}
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={onLogout}
+              className="hidden md:flex items-center space-x-1"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Portal Selection</span>
+            </Button>
           </div>
           
           <div className="flex items-center space-x-4">
@@ -620,7 +646,12 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
               <span className="text-muted-foreground">Connected to Vaidhya Setu</span>
             </div>
-            <Button variant="outline" onClick={onLogout}>
+            {/* Logout Button - Mobile */}
+            <Button variant="outline" onClick={onLogout} className="md:hidden">
+              Logout
+            </Button>
+            {/* Logout Button - Desktop */}
+            <Button variant="outline" onClick={onLogout} className="hidden md:block">
               Logout
             </Button>
           </div>
@@ -1099,16 +1130,16 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
             </CardContent>
           </Card>
 
-          {/* Available Specialists */}
+          {/* Available Admins */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Stethoscope className="w-5 h-5 text-blue-600" />
-                <span>Available Specialists</span>
+                <span>Available Admins</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {availableSpecialists.map((specialist, index) => (
+              {availableAdmins.map((specialist, index) => (
                 <div key={index} className="p-3 border rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <h4 className="font-medium text-foreground text-sm">{specialist.name}</h4>
@@ -1134,7 +1165,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                         onClick={() => startChat(specialist)}
                       >
                         <MessageCircle className="w-3 h-3 mr-1" />
-                        Chat Now
+                        Chat with Admin
                       </Button>
                       <Button 
                         size="sm" 
@@ -1154,13 +1185,13 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                         }}
                       >
                         <Video className="w-3 h-3 mr-1" />
-                        Video Call
+                        Video Call with Admin
                       </Button>
                     </div>
                   ) : (
                     <Button size="sm" className="w-full mt-2" variant="outline" disabled>
                       <MessageCircle className="w-3 h-3 mr-1" />
-                      Busy
+                      Admin Busy
                     </Button>
                   )}
                 </div>
@@ -1179,13 +1210,13 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                     <Video className="w-6 h-6" />
                   </div>
                   <h3 className="font-semibold text-foreground mb-1">Request Consultation</h3>
-                  <p className="text-xs text-muted-foreground">Connect with specialists</p>
+                  <p className="text-xs text-muted-foreground">Connect with admins</p>
                 </CardContent>
               </Card>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Request Specialist Consultation</DialogTitle>
+                <DialogTitle>Request Admin Consultation</DialogTitle>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -1395,18 +1426,18 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                 <h4 className="font-semibold text-foreground mb-2">Center Details</h4>
                 <div className="space-y-1 text-muted-foreground">
                   <p>Name: {centerName}</p>
-                  <p>District: Jaipur, Rajasthan</p>
-                  <p>PIN Code: 302001</p>
-                  <p>Phone: +91 141 2234567</p>
+                  <p>District: Visakhapatnam, Andhra Pradesh</p>
+                  <p>PIN Code: 530001</p>
+                  <p>Phone: +91 891 2234567</p>
                 </div>
               </div>
               <div>
                 <h4 className="font-semibold text-foreground mb-2">Staff on Duty</h4>
                 <div className="space-y-1 text-muted-foreground">
-                  <p>Dr. Rajesh Kumar (MBBS)</p>
-                  <p>Nurse Priya Sharma</p>
-                  <p>ANM Sunita Devi</p>
-                  <p>Pharmacist Ram Lal</p>
+                  <p>Dr. Suresh Reddy (MBBS)</p>
+                  <p>Nurse Anitha Reddy</p>
+                  <p>ANM Lakshmi Devi</p>
+                  <p>Pharmacist Ramesh Babu</p>
                 </div>
               </div>
               <div>
@@ -1415,7 +1446,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                   <p>Patients Registered: {registeredPatients.length}</p>
                   <p>Consultations: 8</p>
                   <p>Emergency Cases: {emergencyPatients.length}</p>
-                  <p>Specialists Connected: 3</p>
+                  <p>Admins Connected: 3</p>
                 </div>
               </div>
             </div>
@@ -1429,13 +1460,13 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
               <DialogTitle className="flex items-center space-x-3">
                 <Avatar className="w-8 h-8">
                   <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                    {selectedSpecialist?.avatar}
+                    {selectedAdmin?.avatar}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <span>Chat with {selectedSpecialist?.name}</span>
+                  <span>Chat with {selectedAdmin?.name}</span>
                   <div className="text-sm text-muted-foreground font-normal">
-                    {selectedSpecialist?.specialty} • {selectedSpecialist?.hospital}
+                    {selectedAdmin?.specialty} • {selectedAdmin?.hospital}
                     <div className="flex items-center space-x-1 mt-1">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       <span className="text-xs">Online</span>
@@ -1451,18 +1482,18 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                 {messages.map((message) => (
                   <div
                     key={message.id}
-                    className={`flex ${message.isSpecialist ? 'justify-start' : 'justify-end'}`}
+                    className={`flex ${message.isAdmin ? 'justify-start' : 'justify-end'}`}
                   >
                     <div
                       className={`max-w-[80%] p-3 rounded-lg ${
-                        message.isSpecialist
+                        message.isAdmin
                           ? 'bg-muted text-foreground'
                           : 'bg-primary text-primary-foreground'
                       }`}
                     >
                       <p className="text-sm">{message.message}</p>
                       <div className={`flex items-center justify-between mt-2 text-xs ${
-                        message.isSpecialist ? 'text-muted-foreground' : 'text-primary-foreground/70'
+                        message.isAdmin ? 'text-muted-foreground' : 'text-primary-foreground/70'
                       }`}>
                         <span>{message.sender}</span>
                         <span>{message.timestamp}</span>
@@ -1476,7 +1507,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
             {/* Chat Input */}
             <div className="flex items-center space-x-2 mt-4">
               <Input
-                placeholder="Type your message to the specialist..."
+                placeholder="Type your message to the admin..."
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
