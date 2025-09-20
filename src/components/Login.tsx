@@ -51,7 +51,7 @@ const Login = ({ onLogin, onBack }: LoginProps) => {
               Vaidhya Setu
             </CardTitle>
             <CardDescription className="text-muted-foreground mt-2">
-              Admin Login Portal
+              Rural Health Center Login
             </CardDescription>
           </div>
         </CardHeader>
@@ -65,7 +65,7 @@ const Login = ({ onLogin, onBack }: LoginProps) => {
               <Input
                 id="name"
                 type="text"
-                placeholder="Dr. John Smith"
+                placeholder="Srinivas"
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
                 className="transition-smooth focus:ring-2 focus:ring-primary/20"
@@ -79,7 +79,7 @@ const Login = ({ onLogin, onBack }: LoginProps) => {
               <Input
                 id="email"
                 type="email"
-                placeholder="doctor@vaidhyasetu.health"
+                placeholder="healthcenter@vaidhyasetu.health"
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
                 className="transition-smooth focus:ring-2 focus:ring-primary/20"
@@ -104,7 +104,7 @@ const Login = ({ onLogin, onBack }: LoginProps) => {
               type="submit" 
               className="w-full medical-gradient shadow-button hover:shadow-lg transition-all duration-300 transform hover:scale-[1.02] mt-6"
             >
-              Access Dashboard
+              Access Portal
             </Button>
           </form>
           
