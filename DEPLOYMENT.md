@@ -15,14 +15,14 @@ git commit -m "Initial commit: Telemedicine platform with video calls"
 ### Step 2: Create GitHub Repository
 1. Go to GitHub.com
 2. Click "+" → "New repository"
-3. Name: `vaidhya-setu-telemedicine`
+3. Name: `clinic-pro-telemedicine`
 4. Description: "Telemedicine platform connecting rural health centers with specialists"
 5. Make it Public (or Private)
 6. Don't initialize with README (you already have one)
 
 ### Step 3: Push to GitHub
 ```bash
-git remote add origin https://github.com/srinivas191206/vaidhya-setu-telemedicine.git
+git remote add origin https://github.com/srinivas191206/clinic-pro-telemedicine.git
 git branch -M main
 git push -u origin main
 ```
@@ -31,7 +31,7 @@ git push -u origin main
 1. Go to [vercel.com](https://vercel.com)
 2. Sign in with GitHub
 3. Click "Import Project"
-4. Select your `vaidhya-setu-telemedicine` repository
+4. Select your `clinic-pro-telemedicine` repository
 5. Configure:
    - Framework Preset: **Vite**
    - Build Command: `npm run build`

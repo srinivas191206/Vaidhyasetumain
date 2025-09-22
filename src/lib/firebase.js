@@ -1,4 +1,4 @@
-// Mock Firebase configuration for Vaidhya Setu telemedicine platform (JavaScript version)
+// Mock Firebase configuration for Clinic Pro telemedicine platform (JavaScript version)
 // This replaces the actual Firebase services with mock implementations
 // allowing the application to run without Firebase dependencies
 

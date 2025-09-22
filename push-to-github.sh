@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# 🚀 Push Vaidhya Setu Telemedicine Platform to GitHub
+# 🚀 Push Clinic Pro Telemedicine Platform to GitHub
 # Run this AFTER creating the GitHub repository
 
-echo "🚀 Pushing Vaidhya Setu Telemedicine Platform to GitHub..."
-echo "📋 Repository: https://github.com/srinivas191206/vaidhya-setu-telemedicine"
+echo "🚀 Pushing Clinic Pro Telemedicine Platform to GitHub..."
+echo "📋 Repository: https://github.com/srinivas191206/clinic-pro-telemedicine"
 echo ""
 
 # Check if we're in the right directory
@@ -34,7 +34,7 @@ git push -u origin main
 if [ $? -eq 0 ]; then
     echo ""
     echo "✅ Successfully pushed to GitHub!"
-    echo "🌐 Repository URL: https://github.com/srinivas191206/vaidhya-setu-telemedicine"
+    echo "🌐 Repository URL: https://github.com/srinivas191206/clinic-pro-telemedicine"
     echo ""
     echo "🎯 Your Telemedicine Platform Features:"
     echo "   🎥 Enhanced video calling with WebRTC"
@@ -46,7 +46,7 @@ if [ $? -eq 0 ]; then
     echo "📋 Next Steps for Deployment:"
     echo "1. Go to vercel.com"
     echo "2. Sign in with GitHub"
-    echo "3. Import your vaidhya-setu-telemedicine repository"
+    echo "3. Import your clinic-pro-telemedicine repository"
     echo "4. Configure environment variables"
     echo "5. Deploy your telemedicine platform!"
     echo ""
@@ -67,5 +67,5 @@ else
     echo ""
     echo "💡 Create the repository first at:"
     echo "   https://github.com/new"
-    echo "   Repository name: vaidhya-setu-telemedicine"
+    echo "   Repository name: clinic-pro-telemedicine"
 fi

@@ -20,7 +20,7 @@ self.addEventListener('push', (event) => {
     data = event.data.json();
   }
   
-  const title = data.title || 'Vaidhya Setu Notification';
+  const title = data.title || 'Clinic Pro Notification';
   const options = {
     body: data.body || 'You have a new notification',
     icon: data.icon || '/logo.png',

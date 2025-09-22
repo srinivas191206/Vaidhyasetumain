@@ -2,7 +2,7 @@
 # Quick Firebase Deployment Script
 # Run this on your local machine where Node.js is installed
 
-echo "🏥 Vaidhya Setu - Quick Firebase Deployment"
+echo "🏥 Clinic Pro - Quick Firebase Deployment"
 echo "==========================================="
 
 # Build and deploy in one go
@@ -17,7 +17,7 @@ echo "🎉 SUCCESS! Your telemedicine platform is live!" && \
 echo "🌐 Primary URL: https://hackathon-79e80.web.app" && \
 echo "🌐 Secondary URL: https://hackathon-79e80.firebaseapp.com" && \
 echo "" && \
-echo "🏥 Vaidhya Setu Features Now Live:" && \
+echo "🏥 Clinic Pro Features Now Live:" && \
 echo "  ✅ Video consultations" && \
 echo "  ✅ Appointment management" && \
 echo "  ✅ Real-time notifications" && \

@@ -6,7 +6,7 @@
 2. **Click the "+" icon** in the top-right corner
 3. **Select "New repository"**
 4. **Fill in these details:**
-   - **Repository name:** `vaidhya-setu-telemedicine`
+   - **Repository name:** `clinic-pro-telemedicine`
    - **Description:** `Telemedicine platform connecting rural health centers with specialist doctors through secure video consultations and real-time notifications`
    - **Visibility:** Public (recommended for open source) or Private
    - **❌ IMPORTANT:** Do NOT check any of these options:
@@ -27,7 +27,7 @@ After creating the repository, GitHub will show you setup instructions. Copy the
 cd /Users/thaladasrinivas/Downloads/telemed-bridge-main
 
 # Add GitHub as remote origin
-git remote add origin https://github.com/srinivas191206/vaidhya-setu-telemedicine.git
+git remote add origin https://github.com/srinivas191206/clinic-pro-telemedicine.git
 
 # Verify remote was added
 git remote -v
@@ -39,7 +39,7 @@ git push -u origin main
 ## Step 3: Verify Upload
 
 After pushing, go to your GitHub repository URL:
-`https://github.com/srinivas191206/vaidhya-setu-telemedicine`
+`https://github.com/srinivas191206/clinic-pro-telemedicine`
 
 You should see all your project files including:
 - ✅ src/ folder with React components
@@ -53,7 +53,7 @@ You should see all your project files including:
 Once your code is on GitHub, you can:
 1. Go to [vercel.com](https://vercel.com)
 2. Sign in with GitHub
-3. Import your `vaidhya-setu-telemedicine` repository
+3. Import your `clinic-pro-telemedicine` repository
 4. Deploy with automatic configuration
 
 ## 🎯 Project Features Ready for Deployment

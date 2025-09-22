@@ -6,7 +6,7 @@
 echo "🚀 Setting up GitHub remote and pushing code..."
 
 # Add remote origin (replace with your actual repository URL)
-git remote add origin https://github.com/srinivas191206/vaidhya-setu-telemedicine.git
+git remote add origin https://github.com/srinivas191206/clinic-pro-telemedicine.git
 
 # Set main branch
 git branch -M main
@@ -15,7 +15,7 @@ git branch -M main
 git push -u origin main
 
 echo "✅ Code pushed to GitHub successfully!"
-echo "🌐 Repository URL: https://github.com/srinivas191206/vaidhya-setu-telemedicine"
+echo "🌐 Repository URL: https://github.com/srinivas191206/clinic-pro-telemedicine"
 echo ""
 echo "📋 Next steps:"
 echo "1. Go to vercel.com"

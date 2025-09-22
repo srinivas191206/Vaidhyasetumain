@@ -1,4 +1,4 @@
-// Firebase Messaging Service Worker for Vaidhya Setu Telemedicine Platform
+// Firebase Messaging Service Worker for Clinic Pro Telemedicine Platform
 // This service worker is required for Firebase Cloud Messaging to work
 
 importScripts('https://www.gstatic.com/firebasejs/12.2.1/firebase-app-compat.js');
@@ -26,10 +26,10 @@ messaging.onBackgroundMessage((payload) => {
   console.log('[firebase-messaging-sw.js] Received background message ', payload);
   
   // Customize notification here
-  const notificationTitle = payload.notification?.title || 'Vaidhya Setu Notification';
+  const notificationTitle = payload.notification?.title || 'Clinic Pro Notification';
   const notificationOptions = {
     body: payload.notification?.body || 'You have a new notification',
-    icon: payload.notification?.icon || '/vaidhya-setu-logo.png',
+    icon: payload.notification?.icon || '/favicon.png',
     badge: '/favicon.ico',
     data: payload.data || {}
   };

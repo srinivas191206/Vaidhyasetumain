@@ -1,6 +1,6 @@
 # Firestore Integration Guide
 
-This guide covers the complete Firestore integration for the Vaidhya Setu telemedicine platform, including collections, services, and video call functionality.
+This guide covers the complete Firestore integration for the Clinic Pro telemedicine platform, including collections, services, and video call functionality.
 
 ## 📋 Collections Structure
 

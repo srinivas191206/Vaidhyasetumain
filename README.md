@@ -28,8 +28,8 @@ A comprehensive telemedicine platform connecting rural health centers with speci
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/srinivas191206/vaidhya-setu.git
-   cd vaidhya-setu
+   git clone https://github.com/srinivas191206/clinic-pro.git
+   cd clinic-pro
    ```
 
 2. **Install dependencies**

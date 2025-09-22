@@ -21,7 +21,7 @@ git add .
 # Check if there are changes to commit
 if ! git diff --staged --quiet; then
     echo "💾 Committing changes to GitHub..."
-    git commit -m "Deploy to Firebase Hosting: Vaidhya Setu Telemedicine Platform
+    git commit -m "Deploy to Firebase Hosting: Clinic Pro Telemedicine Platform
 
 ✨ Features included:
 - Emergency white screen fix with SimpleApp fallback
@@ -32,7 +32,7 @@ if ! git diff --staged --quiet; then
 - WebRTC video consultation
 - Mobile-responsive design
 
-🏥 Platform: Vaidhya Setu - Bridging rural healthcare gaps
+🏥 Platform: Clinic Pro - Bridging rural healthcare gaps
 🌐 Deployment: Firebase Hosting (hackathon-79e80)
 👤 Developer: srinivas191206"
 

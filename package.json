@@ -1,8 +1,8 @@
 {
-  "name": "vaidhya-setu-telemedicine",
+  "name": "clinic-pro-telemedicine",
   "private": true,
   "version": "1.0.0",
-  "description": "Telemedicine platform connecting rural health centers with specialist doctors",
+  "description": "Telemedicine platform connecting rural health centers with specialist doctors - Clinic Pro",
   "type": "module",
   "scripts": {
     "dev": "vite",

@@ -1140,198 +1140,72 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
             </CardContent>
           </Card>
           
-          {/* Medicine Inventory */}
+          {/* Available Doctors */}
           <Card className="lg:col-span-1">
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Package className="w-5 h-5 text-orange-600" />
-                  <span>Medicine Inventory</span>
-                </div>
-                <Dialog open={inventoryDialog} onOpenChange={setInventoryDialog}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" variant="outline">
-                      <Eye className="w-3 h-3 mr-1" />
-                      View All
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-4xl">
-                    <DialogHeader>
-                      <DialogTitle>Complete Medicine Inventory</DialogTitle>
-                    </DialogHeader>
-                    <ScrollArea className="max-h-[500px] pr-4">
-                      <div className="grid md:grid-cols-2 gap-4">
-                        {currentInventory.map((medicine, index) => {
-                          const StatusIcon = getStockStatusIcon(medicine.status);
-                          return (
-                            <Card key={index} className={`border-2 ${getStockStatusColor(medicine.status)}`}>
-                              <CardContent className="p-4">
-                                <div className="flex items-start justify-between mb-3">
-                                  <div className="flex items-center space-x-2">
-                                    <StatusIcon className="w-4 h-4" />
-                                    <h3 className="font-semibold text-sm">{medicine.name}</h3>
-                                  </div>
-                                  <Badge variant="secondary" className="text-xs">
-                                    {medicine.category}
-                                  </Badge>
-                                </div>
-                                <div className="space-y-2 text-xs">
-                                  <div className="flex justify-between">
-                                    <span>Current Stock:</span>
-                                    <span className="font-medium">{medicine.currentStock}</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span>Min Required:</span>
-                                    <span className="font-medium">{medicine.minRequired}</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span>Expiry:</span>
-                                    <span className="font-medium">{medicine.expiry}</span>
-                                  </div>
-                                  <div className="flex justify-between">
-                                    <span>Status:</span>
-                                    <span className={`font-medium capitalize`}>
-                                      {medicine.status}
-                                    </span>
-                                  </div>
-                                </div>
-                                {medicine.status !== "good" && (
-                                  <Button 
-                                    size="sm" 
-                                    className="w-full mt-3"
-                                    onClick={() => {
-                                      setRequestForm({
-                                        ...requestForm,
-                                        medicineName: medicine.name,
-                                        currentStock: medicine.currentStock.toString(),
-                                        quantity: (medicine.minRequired - medicine.currentStock).toString()
-                                      });
-                                      setInventoryDialog(false);
-                                      setInventoryRequestDialog(true);
-                                    }}
-                                  >
-                                    <ShoppingCart className="w-3 h-3 mr-1" />
-                                    Request Supply
-                                  </Button>
-                                )}
-                              </CardContent>
-                            </Card>
-                          );
-                        })}
-                      </div>
-                    </ScrollArea>
-                  </DialogContent>
-                </Dialog>
+              <CardTitle className="flex items-center space-x-2">
+                <Stethoscope className="w-5 h-5 text-blue-600" />
+                <span>Available Doctors</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {currentInventory.filter(med => med.status !== "good").slice(0, 4).map((medicine, index) => {
-                const StatusIcon = getStockStatusIcon(medicine.status);
-                return (
-                  <div key={index} className="p-3 border rounded-lg">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-foreground text-sm">{medicine.name}</h4>
-                      <Badge 
-                        variant="secondary"
-                        className={`text-xs ${getStockStatusColor(medicine.status)}`}
-                      >
-                        <StatusIcon className="w-3 h-3 mr-1" />
-                        {medicine.status}
-                      </Badge>
-                    </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                      <span>Stock: {medicine.currentStock}</span>
-                      <span>Req: {medicine.minRequired}</span>
-                    </div>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      className="w-full mt-2"
-                      onClick={() => {
-                        setRequestForm({
-                          ...requestForm,
-                          medicineName: medicine.name,
-                          currentStock: medicine.currentStock.toString(),
-                          quantity: (medicine.minRequired - medicine.currentStock).toString()
-                        });
-                        setInventoryRequestDialog(true);
-                      }}
+              {availableDoctors.map((doctor, index) => (
+                <div key={index} className="p-3 border rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-medium text-foreground text-sm">{doctor.name}</h4>
+                    <Badge 
+                      variant={doctor.status === "Available" ? "default" : "secondary"}
+                      className="text-xs"
                     >
-                      <ShoppingCart className="w-3 h-3 mr-1" />
-                      Request
-                    </Button>
+                      {doctor.status}
+                    </Badge>
                   </div>
-                );
-              })}
-              
-              <Dialog open={inventoryRequestDialog} onOpenChange={setInventoryRequestDialog}>
-                <DialogTrigger asChild>
-                  <Button className="w-full" variant="outline">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Request Medicine
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>Request Medicine from Doctor</DialogTitle>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div>
-                      <Label htmlFor="medicineName">Medicine Name *</Label>
-                      <Input
-                        id="medicineName"
-                        value={requestForm.medicineName}
-                        onChange={(e) => setRequestForm({...requestForm, medicineName: e.target.value})}
-                        placeholder="Enter medicine name"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="currentStock">Current Stock</Label>
-                        <Input
-                          id="currentStock"
-                          type="number"
-                          value={requestForm.currentStock}
-                          onChange={(e) => setRequestForm({...requestForm, currentStock: e.target.value})}
-                          placeholder="0"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="quantity">Quantity Needed *</Label>
-                        <Input
-                          id="quantity"
-                          type="number"
-                          value={requestForm.quantity}
-                          onChange={(e) => setRequestForm({...requestForm, quantity: e.target.value})}
-                          placeholder="Enter quantity"
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="urgency">Urgency Level</Label>
-                      <select 
-                        id="urgency"
-                        value={requestForm.urgency}
-                        onChange={(e) => setRequestForm({...requestForm, urgency: e.target.value})}
-                        className="w-full p-2 border rounded-md bg-background"
+                  <p className="text-xs text-muted-foreground">{doctor.specialty}</p>
+                  <p className="text-xs text-muted-foreground">{doctor.hospital}</p>
+                  <div className="flex items-center space-x-1 mt-2">
+                    <Clock className="w-3 h-3 text-primary" />
+                    <span className="text-xs text-primary">{doctor.responseTime}</span>
+                  </div>
+                  {doctor.status === "Available" ? (
+                    <div className="flex flex-col space-y-1 mt-2">
+                      <Button 
+                        size="sm" 
+                        className="w-full" 
+                        variant="outline"
+                        onClick={() => startChat(doctor)}
                       >
-                        <option value="normal">Normal</option>
-                        <option value="urgent">Urgent</option>
-                        <option value="emergency">Emergency</option>
-                      </select>
+                        <MessageCircle className="w-3 h-3 mr-1" />
+                        Chat with Doctor
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="w-full medical-gradient text-white"
+                        onClick={() => {
+                          setVideoConsultation({
+                            isOpen: true,
+                            patient: {
+                              name: "Direct Consultation",
+                              age: 0,
+                              condition: "Direct doctor consultation",
+                              time: "Now",
+                              urgent: false,
+                              symptoms: "Direct consultation request"
+                            }
+                          });
+                        }}
+                      >
+                        <Video className="w-3 h-3 mr-1" />
+                        Video Call with Doctor
+                      </Button>
                     </div>
-                  </div>
-                  <div className="flex justify-end space-x-2">
-                    <Button variant="outline" onClick={() => setInventoryRequestDialog(false)}>
-                      Cancel
+                  ) : (
+                    <Button size="sm" className="w-full mt-2" variant="outline" disabled>
+                      <MessageCircle className="w-3 h-3 mr-1" />
+                      Doctor Busy
                     </Button>
-                    <Button onClick={submitMedicineRequest}>
-                      <Send className="w-4 h-4 mr-1" />
-                      Send Request
-                    </Button>
-                  </div>
-                </DialogContent>
-              </Dialog>
+                  )}
+                </div>
+              ))}
             </CardContent>
           </Card>
           
@@ -1641,72 +1515,198 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
             </CardContent>
           </Card>
 
-          {/* Available Doctors */}
+          {/* Medicine Inventory */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Stethoscope className="w-5 h-5 text-blue-600" />
-                <span>Available Doctors</span>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Package className="w-5 h-5 text-orange-600" />
+                  <span>Medicine Inventory</span>
+                </div>
+                <Dialog open={inventoryDialog} onOpenChange={setInventoryDialog}>
+                  <DialogTrigger asChild>
+                    <Button size="sm" variant="outline">
+                      <Eye className="w-3 h-3 mr-1" />
+                      View All
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-4xl">
+                    <DialogHeader>
+                      <DialogTitle>Complete Medicine Inventory</DialogTitle>
+                    </DialogHeader>
+                    <ScrollArea className="max-h-[500px] pr-4">
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {currentInventory.map((medicine, index) => {
+                          const StatusIcon = getStockStatusIcon(medicine.status);
+                          return (
+                            <Card key={index} className={`border-2 ${getStockStatusColor(medicine.status)}`}>
+                              <CardContent className="p-4">
+                                <div className="flex items-start justify-between mb-3">
+                                  <div className="flex items-center space-x-2">
+                                    <StatusIcon className="w-4 h-4" />
+                                    <h3 className="font-semibold text-sm">{medicine.name}</h3>
+                                  </div>
+                                  <Badge variant="secondary" className="text-xs">
+                                    {medicine.category}
+                                  </Badge>
+                                </div>
+                                <div className="space-y-2 text-xs">
+                                  <div className="flex justify-between">
+                                    <span>Current Stock:</span>
+                                    <span className="font-medium">{medicine.currentStock}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>Min Required:</span>
+                                    <span className="font-medium">{medicine.minRequired}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>Expiry:</span>
+                                    <span className="font-medium">{medicine.expiry}</span>
+                                  </div>
+                                  <div className="flex justify-between">
+                                    <span>Status:</span>
+                                    <span className={`font-medium capitalize`}>
+                                      {medicine.status}
+                                    </span>
+                                  </div>
+                                </div>
+                                {medicine.status !== "good" && (
+                                  <Button 
+                                    size="sm" 
+                                    className="w-full mt-3"
+                                    onClick={() => {
+                                      setRequestForm({
+                                        ...requestForm,
+                                        medicineName: medicine.name,
+                                        currentStock: medicine.currentStock.toString(),
+                                        quantity: (medicine.minRequired - medicine.currentStock).toString()
+                                      });
+                                      setInventoryDialog(false);
+                                      setInventoryRequestDialog(true);
+                                    }}
+                                  >
+                                    <ShoppingCart className="w-3 h-3 mr-1" />
+                                    Request Supply
+                                  </Button>
+                                )}
+                              </CardContent>
+                            </Card>
+                          );
+                        })}
+                      </div>
+                    </ScrollArea>
+                  </DialogContent>
+                </Dialog>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              {availableDoctors.map((doctor, index) => (
-                <div key={index} className="p-3 border rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium text-foreground text-sm">{doctor.name}</h4>
-                    <Badge 
-                      variant={doctor.status === "Available" ? "default" : "secondary"}
-                      className="text-xs"
-                    >
-                      {doctor.status}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{doctor.specialty}</p>
-                  <p className="text-xs text-muted-foreground">{doctor.hospital}</p>
-                  <div className="flex items-center space-x-1 mt-2">
-                    <Clock className="w-3 h-3 text-primary" />
-                    <span className="text-xs text-primary">{doctor.responseTime}</span>
-                  </div>
-                  {doctor.status === "Available" ? (
-                    <div className="flex flex-col space-y-1 mt-2">
-                      <Button 
-                        size="sm" 
-                        className="w-full" 
-                        variant="outline"
-                        onClick={() => startChat(doctor)}
+              {currentInventory.filter(med => med.status !== "good").slice(0, 4).map((medicine, index) => {
+                const StatusIcon = getStockStatusIcon(medicine.status);
+                return (
+                  <div key={index} className="p-3 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="font-medium text-foreground text-sm">{medicine.name}</h4>
+                      <Badge 
+                        variant="secondary"
+                        className={`text-xs ${getStockStatusColor(medicine.status)}`}
                       >
-                        <MessageCircle className="w-3 h-3 mr-1" />
-                        Chat with Doctor
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        className="w-full medical-gradient text-white"
-                        onClick={() => {
-                          setVideoConsultation({
-                            isOpen: true,
-                            patient: {
-                              name: "Direct Consultation",
-                              age: 0,
-                              condition: "Direct doctor consultation",
-                              time: "Now",
-                              urgent: false,
-                              symptoms: "Direct consultation request"
-                            }
-                          });
-                        }}
-                      >
-                        <Video className="w-3 h-3 mr-1" />
-                        Video Call with Doctor
-                      </Button>
+                        <StatusIcon className="w-3 h-3 mr-1" />
+                        {medicine.status}
+                      </Badge>
                     </div>
-                  ) : (
-                    <Button size="sm" className="w-full mt-2" variant="outline" disabled>
-                      <MessageCircle className="w-3 h-3 mr-1" />
-                      Doctor Busy
+                    <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+                      <span>Stock: {medicine.currentStock}</span>
+                      <span>Req: {medicine.minRequired}</span>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="w-full mt-2"
+                      onClick={() => {
+                        setRequestForm({
+                          ...requestForm,
+                          medicineName: medicine.name,
+                          currentStock: medicine.currentStock.toString(),
+                          quantity: (medicine.minRequired - medicine.currentStock).toString()
+                        });
+                        setInventoryRequestDialog(true);
+                      }}
+                    >
+                      <ShoppingCart className="w-3 h-3 mr-1" />
+                      Request
                     </Button>
-                  )}
-                </div>
-              ))}
+                  </div>
+                );
+              })}
+              
+              <Dialog open={inventoryRequestDialog} onOpenChange={setInventoryRequestDialog}>
+                <DialogTrigger asChild>
+                  <Button className="w-full" variant="outline">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Request Medicine
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Request Medicine from Doctor</DialogTitle>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    <div>
+                      <Label htmlFor="medicineName">Medicine Name *</Label>
+                      <Input
+                        id="medicineName"
+                        value={requestForm.medicineName}
+                        onChange={(e) => setRequestForm({...requestForm, medicineName: e.target.value})}
+                        placeholder="Enter medicine name"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="currentStock">Current Stock</Label>
+                        <Input
+                          id="currentStock"
+                          type="number"
+                          value={requestForm.currentStock}
+                          onChange={(e) => setRequestForm({...requestForm, currentStock: e.target.value})}
+                          placeholder="0"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="quantity">Quantity Needed *</Label>
+                        <Input
+                          id="quantity"
+                          type="number"
+                          value={requestForm.quantity}
+                          onChange={(e) => setRequestForm({...requestForm, quantity: e.target.value})}
+                          placeholder="Enter quantity"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <Label htmlFor="urgency">Urgency Level</Label>
+                      <select 
+                        id="urgency"
+                        value={requestForm.urgency}
+                        onChange={(e) => setRequestForm({...requestForm, urgency: e.target.value})}
+                        className="w-full p-2 border rounded-md bg-background"
+                      >
+                        <option value="normal">Normal</option>
+                        <option value="urgent">Urgent</option>
+                        <option value="emergency">Emergency</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => setInventoryRequestDialog(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={submitMedicineRequest}>
+                      <Send className="w-4 h-4 mr-1" />
+                      Send Request
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
             </CardContent>
           </Card>
         </div>
@@ -1800,100 +1800,6 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                 <Button onClick={handleConsultationSubmit} disabled={isSubmittingRequest}>
                   <Send className="w-4 h-4 mr-1" />
                   Submit Request
-                </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-          <Dialog open={emergencyDialog} onOpenChange={setEmergencyDialog}>
-            <DialogTrigger asChild>
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer">
-                <CardContent className="p-6 text-center">
-                  <div className="p-3 rounded-full bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 mx-auto mb-3 w-fit">
-                    <AlertTriangle className="w-6 h-6" />
-                  </div>
-                  <h3 className="font-semibold text-foreground mb-1">Emergency Consultation</h3>
-                  <p className="text-xs text-muted-foreground">Immediate medical attention</p>
-                </CardContent>
-              </Card>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl">
-              <DialogHeader>
-                <DialogTitle>Request Emergency Consultation</DialogTitle>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="patientName">Patient Name *</Label>
-                    <Input
-                      id="patientName"
-                      value={consultationRequest.patientName}
-                      onChange={(e) => setConsultationRequest({...consultationRequest, patientName: e.target.value})}
-                      placeholder="Enter patient name"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="age">Age</Label>
-                    <Input
-                      id="age"
-                      type="number"
-                      value={consultationRequest.age}
-                      onChange={(e) => setConsultationRequest({...consultationRequest, age: e.target.value})}
-                      placeholder="Patient age"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <Label htmlFor="condition">Primary Condition/Complaint *</Label>
-                  <Input
-                    id="condition"
-                    value={consultationRequest.condition}
-                    onChange={(e) => setConsultationRequest({...consultationRequest, condition: e.target.value})}
-                    placeholder="e.g., Chest pain, Shortness of breath"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="symptoms">Symptoms & Duration</Label>
-                  <Textarea
-                    id="symptoms"
-                    value={consultationRequest.symptoms}
-                    onChange={(e) => setConsultationRequest({...consultationRequest, symptoms: e.target.value})}
-                    placeholder="Describe symptoms, when they started, severity, etc."
-                    className="min-h-20"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="vitals">Current Vitals</Label>
-                  <Input
-                    id="vitals"
-                    value={consultationRequest.vitals}
-                    onChange={(e) => setConsultationRequest({...consultationRequest, vitals: e.target.value})}
-                    placeholder="BP: 120/80, HR: 72 bpm, Temp: 98.6°F"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="urgency">Urgency Level</Label>
-                  <select 
-                    className="w-full p-2 border rounded-md"
-                    value={consultationRequest.urgency}
-                    onChange={(e) => setConsultationRequest({...consultationRequest, urgency: e.target.value})}
-                  >
-                    <option value="normal">Normal - Can wait for scheduled consultation</option>
-                    <option value="urgent">Urgent - Needs consultation within 1 hour</option>
-                    <option value="emergency">Emergency - Immediate consultation required</option>
-                  </select>
-                </div>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button variant="outline" onClick={() => setConsultationDialog(false)}>
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={handleConsultationSubmit} 
-                  className="bg-blue-600 hover:bg-blue-700"
-                  disabled={isSubmittingRequest}
-                >
-                  <Video className="w-4 h-4 mr-2" />
-                  {isSubmittingRequest ? "Sending Request..." : "Send Consultation Request"}
                 </Button>
               </div>
             </DialogContent>
@@ -2028,7 +1934,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                 <h4 className="font-semibold text-foreground mb-2">Center Details</h4>
                 <div className="space-y-1 text-muted-foreground">
                   <p>Name: {centerName}</p>
-                  <p>District: Visakhapatnam, Andhra Pradesh</p>
+                  <p>District: Nabha, Punjab</p>
                   <p>PIN Code: 530001</p>
                   <p>Phone: +91 891 2234567</p>
                 </div>

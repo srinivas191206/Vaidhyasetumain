@@ -1,8 +1,8 @@
-# Firebase Configuration Guide for Vaidhya Setu Telemedicine Platform
+# Firebase Configuration Guide for Clinic Pro Telemedicine Platform
 
 ## Overview
 
-This guide explains the Firebase configuration for the Vaidhya Setu telemedicine platform. Firebase provides several services that enhance the platform's functionality, including authentication, real-time database, storage, analytics, and messaging.
+This guide explains the Firebase configuration for the Clinic Pro telemedicine platform. Firebase provides several services that enhance the platform's functionality, including authentication, real-time database, storage, analytics, and messaging.
 
 ## Firebase Services Configuration
 

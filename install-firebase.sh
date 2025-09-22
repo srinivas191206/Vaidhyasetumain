@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "📦 Installing Firebase and Dependencies for Vaidhya Setu"
+echo "📦 Installing Firebase and Dependencies for Clinic Pro"
 echo "====================================================="
 
 # Check if we're in the right directory
@@ -35,7 +35,7 @@ if [ $? -eq 0 ]; then
     echo "   2. Build the project: npm run build"
     echo "   3. Deploy to Firebase: firebase deploy --only hosting"
     echo ""
-    echo "🏥 Your Vaidhya Setu platform includes:"
+    echo "🏥 Your Clinic Pro platform includes:"
     echo "   • WebRTC video calls using Firebase Firestore signaling"
     echo "   • Real-time appointment sync"
     echo "   • Secure patient data storage"

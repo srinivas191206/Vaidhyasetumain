@@ -33,7 +33,7 @@ echo "   firebase deploy --only hosting"
 echo ""
 
 echo "🎯 EXPECTED RESULT:"
-echo "   Your Vaidhya Setu telemedicine platform will be live at:"
+echo "   Your Clinic Pro telemedicine platform will be live at:"
 echo "   📱 https://hackathon-79e80.web.app"
 echo "   📱 https://hackathon-79e80.firebaseapp.com"
 echo ""

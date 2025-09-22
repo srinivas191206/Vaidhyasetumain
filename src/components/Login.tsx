@@ -79,7 +79,7 @@ const Login = ({ onLogin, onBack }: LoginProps) => {
               <Input
                 id="email"
                 type="email"
-                placeholder="healthcenter@vaidhyasetu.health"
+                placeholder="healthcenter@clinicpro.health"
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
                 className="transition-smooth focus:ring-2 focus:ring-primary/20"

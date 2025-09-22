@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Deploying Vaidhya Setu Telemedicine Platform to Firebase Hosting..."
+echo "🚀 Deploying Clinic Pro Telemedicine Platform to Firebase Hosting..."
 echo "===================================================================="
 
 # Check if we're in the right directory
@@ -68,7 +68,7 @@ if [ $? -eq 0 ]; then
     echo "🎉 DEPLOYMENT SUCCESSFUL!"
     echo "======================="
     echo ""
-    echo "🌍 Your Vaidhya Setu telemedicine platform is now live!"
+    echo "🌍 Your Clinic Pro telemedicine platform is now live!"
     echo ""
     echo "📱 Live URLs:"
     echo "   • Primary: https://hackathon-79e80.web.app"

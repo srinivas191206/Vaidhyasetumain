@@ -1,6 +1,6 @@
 # 🔥 Firebase Hosting Deployment Guide
 
-## Your Vaidhya Setu Telemedicine Platform is Ready for Firebase Hosting!
+## Your Clinic Pro Telemedicine Platform is Ready for Firebase Hosting!
 
 ### ✅ Pre-Deployment Status
 - **GitHub**: ✅ Successfully pushed with username `srinivas191206`
@@ -50,7 +50,7 @@ firebase deploy --only hosting
 
 ## 🌐 Expected Live URLs
 
-After successful deployment, your Vaidhya Setu platform will be available at:
+After successful deployment, your Clinic Pro platform will be available at:
 
 - **Primary URL**: https://hackathon-79e80.web.app
 - **Secondary URL**: https://hackathon-79e80.firebaseapp.com

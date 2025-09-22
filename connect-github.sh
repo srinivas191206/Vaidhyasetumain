@@ -19,7 +19,7 @@ fi
 
 # Add GitHub remote
 echo "📡 Adding GitHub remote..."
-git remote add origin https://github.com/srinivas191206/vaidhya-setu-telemedicine.git
+git remote add origin https://github.com/srinivas191206/clinic-pro-telemedicine.git
 
 # Verify remote was added
 echo "🔍 Verifying remote..."
@@ -35,7 +35,7 @@ git push -u origin main
 
 echo ""
 echo "✅ Successfully connected to GitHub!"
-echo "🌐 Repository URL: https://github.com/srinivas191206/vaidhya-setu-telemedicine"
+echo "🌐 Repository URL: https://github.com/srinivas191206/clinic-pro-telemedicine"
 echo ""
 echo "🎯 Next Steps:"
 echo "1. Visit your repository on GitHub to verify files uploaded"

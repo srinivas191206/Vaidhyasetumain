@@ -1,4 +1,4 @@
-// Firebase Analytics integration for Vaidhya Setu telemedicine platform
+// Firebase Analytics integration for Clinic Pro telemedicine platform
 import { analytics } from './firebase';
 import { logEvent } from 'firebase/analytics';
 
@@ -9,7 +9,7 @@ export const trackEvent = {
     if (analytics) {
       logEvent(analytics, 'login', {
         user_role: userRole,
-        platform: 'vaidhya_setu'
+        platform: 'clinic_pro'
       });
     }
   },
@@ -61,7 +61,7 @@ export const trackEvent = {
     if (analytics) {
       logEvent(analytics, 'portal_selected', {
         portal_type: portalType,
-        platform: 'vaidhya_setu'
+        platform: 'clinic_pro'
       });
     }
   },
@@ -105,7 +105,7 @@ export const trackPageView = (pageName: string, userRole?: string) => {
     logEvent(analytics, 'page_view', {
       page_name: pageName,
       user_role: userRole || 'anonymous',
-      platform: 'vaidhya_setu'
+      platform: 'clinic_pro'
     });
   }
 };
@@ -116,7 +116,7 @@ export const trackError = (errorMessage: string, errorContext: string) => {
     logEvent(analytics, 'app_error', {
       error_message: errorMessage,
       error_context: errorContext,
-      platform: 'vaidhya_setu'
+      platform: 'clinic_pro'
     });
   }
 };

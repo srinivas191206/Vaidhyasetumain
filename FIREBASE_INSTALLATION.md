@@ -2,7 +2,7 @@
 
 ## ✅ Current Status
 
-Your Vaidhya Setu telemedicine platform already has Firebase properly configured:
+Your Clinic Pro telemedicine platform already has Firebase properly configured:
 
 - **Firebase SDK**: ✅ Installed (version 12.2.1)
 - **Configuration**: ✅ Ready (hackathon-79e80 project)

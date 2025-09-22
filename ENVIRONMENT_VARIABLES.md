@@ -1,6 +1,6 @@
 # Environment Variables Configuration
 
-This document explains how to configure and use environment variables in the Vaidhya Setu Telemedicine Platform.
+This document explains how to configure and use environment variables in the Clinic Pro Telemedicine Platform.
 
 ## Overview
 
@@ -36,7 +36,7 @@ VITE_FIREBASE_MEASUREMENT_ID=your_firebase_measurement_id
 ### Application Configuration
 ```bash
 # Application Configuration
-VITE_APP_NAME=Vaidhya Setu Telemedicine
+VITE_APP_NAME=Clinic Pro Telemedicine
 VITE_APP_VERSION=1.0.0
 VITE_APP_ENVIRONMENT=development
 ```

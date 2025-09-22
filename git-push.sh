@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Pushing Vaidhya Setu Emergency Fix to GitHub..."
+echo "🚀 Pushing Clinic Pro Emergency Fix to GitHub..."
 echo "================================================="
 
 # Configure Git with preferred username
@@ -32,7 +32,7 @@ else
 - Add emergency deployment scripts for quick fixes
 
 This WILL fix the white screen on https://anits.netlify.app
-Platform: Vaidhya Setu Telemedicine - Connecting rural healthcare"
+Platform: Clinic Pro Telemedicine - Connecting rural healthcare"
 fi
 
 # Check if remote exists, if not add it
@@ -63,7 +63,7 @@ if git push -u origin main; then
     echo "✅ What happens next:"
     echo "   1. Netlify detects the Git push"
     echo "   2. Automatically rebuilds and deploys"
-    echo "   3. Site should show working Vaidhya Setu platform"
+    echo "   3. Site should show working Clinic Pro platform"
     echo "   4. NO MORE WHITE SCREEN!"
     echo ""
     echo "🔍 If you still see white screen after 3 minutes:"

@@ -202,7 +202,7 @@ export const generatePrescriptionHTML = (
     <body>
       <div class="header">
         <h1>Medical Prescription</h1>
-        <p>Vaidhya Setu - Telemedicine Platform</p>
+        <p>Clinic Pro - Telemedicine Platform</p>
       </div>
       
       <div class="prescription-info">
@@ -233,7 +233,7 @@ export const generatePrescriptionHTML = (
       
       <div class="footer">
         <p><strong>Doctor's Signature:</strong> ${doctorName}</p>
-        <p><em>This is a digitally generated prescription from Vaidhya Setu platform.</em></p>
+        <p><em>This is a digitally generated prescription from Clinic Pro platform.</em></p>
       </div>
     </body>
     </html>

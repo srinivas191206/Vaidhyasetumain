@@ -1,8 +1,8 @@
-# Vercel Deployment Guide for Vaidhya Setu Telemedicine Platform
+# Vercel Deployment Guide for Clinic Pro Telemedicine Platform
 
 ## Overview
 
-This guide explains how to properly deploy the Vaidhya Setu telemedicine platform to Vercel with Firebase configuration. The key issue we're addressing is the proper handling of environment variables to avoid the "Secret does not exist" error.
+This guide explains how to properly deploy the Clinic Pro telemedicine platform to Vercel with Firebase configuration. The key issue we're addressing is the proper handling of environment variables to avoid the "Secret does not exist" error.
 
 ## Environment Variables Configuration
 
@@ -33,7 +33,7 @@ The updated [vercel.json](file:///Users/thaladasrinivas/Downloads/telemed-bridge
 
 1. **Access Your Vercel Project**
    - Go to [https://vercel.com/dashboard](https://vercel.com/dashboard)
-   - Select your Vaidhya Setu project
+   - Select your Clinic Pro project
 
 2. **Navigate to Environment Variables Settings**
    - Click on the "Settings" tab
