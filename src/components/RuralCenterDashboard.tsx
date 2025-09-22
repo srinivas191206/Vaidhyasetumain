@@ -886,7 +886,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2 text-sm">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-muted-foreground">Connected to Vaidhya Setu</span>
+              <span className="text-muted-foreground">Connected to Clinic Pro</span>
             </div>
             {/* Logout Button - Mobile */}
             <Button variant="outline" onClick={onLogout} className="md:hidden">

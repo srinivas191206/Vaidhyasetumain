@@ -72,10 +72,10 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
           >
             <img 
               src={vaidhyaSetuLogo} 
-              alt="Vaidhya Setu Logo" 
+              alt="Clinic Pro Logo" 
               className="h-10 w-auto"
             />
-            <span className="text-xl font-bold text-foreground">Vaidhya Setu</span>
+            <span className="text-xl font-bold text-foreground">Clinic Pro</span>
           </button>
 
 

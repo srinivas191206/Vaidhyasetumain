@@ -165,7 +165,7 @@ const ProfileTab = ({ userName }: ProfileTabProps) => {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Heart className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm">Vaidhya Setu since {doctorProfile.joinedMediConnect}</span>
+                    <span className="text-sm">Clinic Pro since {doctorProfile.joinedMediConnect}</span>
                   </div>
                 </div>
               </div>

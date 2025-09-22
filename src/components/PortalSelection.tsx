@@ -78,10 +78,10 @@ const PortalSelection = ({ onPortalSelect }: PortalSelectionProps) => {
           <div className="flex items-center justify-center space-x-3 mb-6">
             <img 
               src={vaidhyaSetuLogo} 
-              alt="Vaidhya Setu Logo" 
+              alt="Clinic Pro Logo" 
               className="h-16 w-auto"
             />
-            <h1 className="text-4xl font-bold text-foreground">Vaidhya Setu</h1>
+            <h1 className="text-4xl font-bold text-foreground">Clinic Pro</h1>
           </div>
           <p className="text-xl text-muted-foreground mb-2">
             Bridging Healthcare Through Technology
@@ -204,7 +204,7 @@ const PortalSelection = ({ onPortalSelect }: PortalSelectionProps) => {
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            Powered by Medivine • Connecting general doctors with rural healthcare
+            Powered by Clinic Pro • Connecting general doctors with rural healthcare
           </p>
         </div>
       </div>

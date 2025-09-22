@@ -1,4 +1,4 @@
-# 🏥 Vaidhya Setu - Telemedicine Platform
+# 🏥 Clinic Pro - Telemedicine Platform
 
 A comprehensive telemedicine platform connecting rural health centers with specialist doctors through secure video consultations and real-time notifications.
 

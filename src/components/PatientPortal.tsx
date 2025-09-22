@@ -134,7 +134,7 @@ const PatientPortal = ({ patientName, onLogout }: PatientPortalProps) => {
             </div>
             <div>
               <h1 className="text-lg font-bold text-foreground">Welcome, {patientName}</h1>
-              <p className="text-xs text-muted-foreground">Patient Portal - Vaidhya Setu</p>
+              <p className="text-xs text-muted-foreground">Patient Portal - Clinic Pro</p>
             </div>
           </div>
           

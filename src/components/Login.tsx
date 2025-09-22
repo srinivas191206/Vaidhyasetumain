@@ -42,13 +42,13 @@ const Login = ({ onLogin, onBack }: LoginProps) => {
           <div className="flex justify-center">
             <img 
               src={vaidhyaSetuLogo} 
-              alt="Vaidhya Setu Logo" 
+              alt="Clinic Pro Logo" 
               className="h-16 w-auto"
             />
           </div>
           <div>
             <CardTitle className="text-2xl font-bold text-foreground">
-              Vaidhya Setu
+              Clinic Pro
             </CardTitle>
             <CardDescription className="text-muted-foreground mt-2">
               Rural Health Center Login
@@ -74,7 +74,7 @@ const Login = ({ onLogin, onBack }: LoginProps) => {
             
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-medium">
-                Vaidhya Setu Email
+                Clinic Pro Email
               </Label>
               <Input
                 id="email"
