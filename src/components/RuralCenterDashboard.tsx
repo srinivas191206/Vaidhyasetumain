@@ -4,11 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import OfflinePatientRecords from "./OfflinePatientRecords";
+
 import { 
   Building2, 
   Users, 
@@ -2239,77 +2242,60 @@ const RuralCenterDashboard = ({ centerName, onLogout, language }: RuralCenterDas
             <DialogHeader>
               <DialogTitle>Patient Records - Today's Patients</DialogTitle>
             </DialogHeader>
-            <ScrollArea className="h-[600px]">
-              <div className="grid gap-4">
-                {registeredPatients.map((patient, index) => (
-                  <Card key={index} className="p-4">
-                    <div className="flex items-start space-x-4">
-                      <Avatar className="w-12 h-12">
-                        <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                          {patient.name.split(' ').map(n => n[0]).join('')}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-2">
-                          <h3 className="font-semibold text-lg">{patient.name}, {patient.age}</h3>
-                          <Badge variant="outline">{patient.patientId}</Badge>
-                        </div>
-                        
-                        <div className="grid md:grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <h4 className="font-medium text-foreground mb-2">Basic Information</h4>
-                            <div className="space-y-1 text-muted-foreground">
-                              <p><strong>Condition:</strong> {patient.condition}</p>
-                              <p><strong>Phone:</strong> {patient.phone}</p>
-                              <p><strong>Address:</strong> {patient.address}</p>
-                              <p><strong>Last Visit:</strong> {patient.lastVisit}</p>
-                              <p><strong>Allergies:</strong> {patient.allergies}</p>
-                              <p><strong>Appointment Slot:</strong> {patient.appointmentSlot || patient.appointment || "No preference set"}</p>
+            <Tabs defaultValue="today" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="today">Today's Patients</TabsTrigger>
+                <TabsTrigger value="offline">Offline Records</TabsTrigger>
+              </TabsList>
+              <TabsContent value="today">
+                <ScrollArea className="h-[500px]">
+                  <div className="grid gap-4">
+                    {registeredPatients.map((patient, index) => (
+                      <Card key={index} className="p-4">
+                        <div className="flex items-start space-x-4">
+                          <Avatar className="w-12 h-12">
+                            <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                              {patient.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-2">
+                              <h3 className="font-semibold text-lg">{patient.name}, {patient.age}</h3>
+                              <Badge variant="outline">{patient.patientId}</Badge>
+                            </div>
+                            
+                            <div className="grid md:grid-cols-2 gap-4 text-sm">
+                              <div>
+                                <p className="text-muted-foreground mb-1">Gender:</p>
+                                <p className="font-medium">{patient.gender}</p>
+                              </div>
+                              <div>
+                                <p className="text-muted-foreground mb-1">Phone:</p>
+                                <p className="font-medium">{patient.phone}</p>
+                              </div>
+                              <div>
+                                <p className="text-muted-foreground mb-1">Address:</p>
+                                <p className="font-medium">{patient.address}</p>
+                              </div>
+                              <div>
+                                <p className="text-muted-foreground mb-1">Medical History:</p>
+                                <p className="font-medium">{patient.medicalHistory}</p>
+                              </div>
                             </div>
                           </div>
-                          
-                          <div>
-                            <h4 className="font-medium text-foreground mb-2">Current Vitals</h4>
-                            <div className="space-y-1 text-muted-foreground">
-                              <p><strong>Blood Pressure:</strong> {patient.vitals.bloodPressure}</p>
-                              <p><strong>Heart Rate:</strong> {patient.vitals.heartRate}</p>
-                              <p><strong>Temperature:</strong> {patient.vitals.temperature}</p>
-                              <p><strong>Weight:</strong> {patient.vitals.weight}</p>
-                            </div>
-                          </div>
                         </div>
-                        
-                        <div className="mt-3">
-                          <h4 className="font-medium text-foreground mb-2">Medical History</h4>
-                          <p className="text-sm text-muted-foreground">{patient.medicalHistory}</p>
-                        </div>
-                        
-                        <div className="flex space-x-2 mt-4">
-                          <Button 
-                            size="sm" 
-                            onClick={() => {
-                              setConsultationRequest({
-                                patientName: patient.name,
-                                age: patient.age.toString(),
-                                condition: patient.condition,
-                                symptoms: "",
-                                vitals: `${patient.vitals.bloodPressure}, ${patient.vitals.heartRate}`,
-                                urgency: "normal"
-                              });
-                              setPatientRecordsDialog(false);
-                              setConsultationDialog(true);
-                            }}
-                          >
-                            <Video className="w-3 h-3 mr-1" />
-                            Request Consultation
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </ScrollArea>
+                      </Card>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </TabsContent>
+              <TabsContent value="offline">
+                <OfflinePatientRecords />
+              </TabsContent>
+            </Tabs>
+            <DialogFooter>
+              <Button onClick={() => setPatientRecordsDialog(false)}>Close</Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 
