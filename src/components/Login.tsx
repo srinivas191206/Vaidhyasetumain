@@ -1,4 +1,4 @@
-import vaidhyaSetuLogo from "@/assets/vaidhya-setu-logo.png";
+import clinicProLogo from "/favicon.png";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,7 +41,7 @@ const Login = ({ onLogin, onBack }: LoginProps) => {
         <CardHeader className="text-center space-y-4">
           <div className="flex justify-center">
             <img 
-              src={vaidhyaSetuLogo} 
+              src={clinicProLogo} 
               alt="Clinic Pro Logo" 
               className="h-16 w-auto"
             />

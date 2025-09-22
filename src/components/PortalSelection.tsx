@@ -1,4 +1,4 @@
-import vaidhyaSetuLogo from "@/assets/vaidhya-setu-logo.png";
+import clinicProLogo from "/favicon.png";
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -77,7 +77,7 @@ const PortalSelection = ({ onPortalSelect }: PortalSelectionProps) => {
         <div className="text-center mb-12">
           <div className="flex items-center justify-center space-x-3 mb-6">
             <img 
-              src={vaidhyaSetuLogo} 
+              src={clinicProLogo} 
               alt="Clinic Pro Logo" 
               className="h-16 w-auto"
             />

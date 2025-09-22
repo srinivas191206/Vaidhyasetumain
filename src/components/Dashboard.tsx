@@ -1,4 +1,4 @@
-import vaidhyaSetuLogo from "@/assets/vaidhya-setu-logo.png";
+import clinicProLogo from "/favicon.png";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,7 +71,7 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
             className="flex items-center space-x-2 hover:opacity-80 transition-opacity"
           >
             <img 
-              src={vaidhyaSetuLogo} 
+              src={clinicProLogo} 
               alt="Clinic Pro Logo" 
               className="h-10 w-auto"
             />
