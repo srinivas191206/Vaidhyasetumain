@@ -32,7 +32,8 @@ import {
   AlertCircle,
   CheckCircle,
   CreditCard,
-  IndianRupee
+  IndianRupee,
+  Globe
 } from "lucide-react";
 import VideoConsultation from "./VideoConsultation";
 import { 
@@ -62,9 +63,174 @@ interface Booking {
 interface RuralCenterDashboardProps {
   centerName: string;
   onLogout: () => void;
+  language: string;
 }
 
-const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProps) => {
+// Translation object
+const translations = {
+  english: {
+    dashboardTitle: "Rural Health Center Portal",
+    emergencyPatients: "Emergency Patients",
+    bookingsPayments: "Bookings & Payments",
+    newBooking: "New Booking",
+    availableDoctors: "Available Doctors",
+    todaysPatients: "Today's Patients",
+    registerNewPatient: "Register New Patient",
+    medicineInventory: "Medicine Inventory",
+    viewAll: "View All",
+    requestMedicine: "Request Medicine",
+    requestConsultation: "Request Consultation",
+    patientRecords: "Patient Records",
+    emergency: "Emergency",
+    healthCenterInfo: "Health Center Information",
+    medicineRequests: "Medicine Requests",
+    noBookingsToday: "No bookings for today",
+    totalCollectedToday: "Total Collected Today",
+    doctorCollectionSummary: "Doctor Collection Summary",
+    home: "Home",
+    logout: "Logout",
+    backToPortal: "Back to Portal Selection",
+    connectedTo: "Connected to Clinic Pro"
+  },
+  hindi: {
+    dashboardTitle: "ग्रामीण स्वास्थ्य केंद्र पोर्टल",
+    emergencyPatients: "आपातकालीन मरीज़",
+    bookingsPayments: "बुकिंग और भुगतान",
+    newBooking: "नई बुकिंग",
+    availableDoctors: "उपलब्ध डॉक्टर",
+    todaysPatients: "आज के मरीज़",
+    registerNewPatient: "नया मरीज पंजीकृत करें",
+    medicineInventory: "दवा सूची",
+    viewAll: "सभी देखें",
+    requestMedicine: "दवा का अनुरोध करें",
+    requestConsultation: "परामर्श का अनुरोध करें",
+    patientRecords: "मरीज के रिकॉर्ड",
+    emergency: "आपातकाल",
+    healthCenterInfo: "स्वास्थ्य केंद्र की जानकारी",
+    medicineRequests: "दवा के अनुरोध",
+    noBookingsToday: "आज के लिए कोई बुकिंग नहीं है",
+    totalCollectedToday: "आज एकत्रित कुल राशि",
+    doctorCollectionSummary: "डॉक्टर संग्रह सारांश",
+    home: "होम",
+    logout: "लॉगआउट",
+    backToPortal: "पोर्टल चयन पर वापस जाएं",
+    connectedTo: "क्लिनिक प्रो से जुड़ा हुआ"
+  },
+  telugu: {
+    dashboardTitle: "గ్రామీణ ఆరోగ్య కేంద్ర పోర్టల్",
+    emergencyPatients: "అత్యవసర రోగులు",
+    bookingsPayments: "బుకింగ్‌లు మరియు చెల్లింపులు",
+    newBooking: "కొత్త బుకింగ్",
+    availableDoctors: "అందుబాటులో ఉన్న డాక్టర్లు",
+    todaysPatients: "ఈ రోజు రోగులు",
+    registerNewPatient: "కొత్త రోగిని నమోదు చేయండి",
+    medicineInventory: "మందుల సరఫరా",
+    viewAll: "అన్నీ చూడండి",
+    requestMedicine: "మందుల కోసం అభ్యర్థించండి",
+    requestConsultation: "సలహా కోసం అభ్యర్థించండి",
+    patientRecords: "రోగి రికార్డులు",
+    emergency: "అత్యవసరం",
+    healthCenterInfo: "ఆరోగ్య కేంద్ర సమాచారం",
+    medicineRequests: "మందుల అభ్యర్థనలు",
+    noBookingsToday: "ఈ రోజుకు బుకింగ్‌లు లేవు",
+    totalCollectedToday: "ఈ రోజు సేకరించిన మొత్తం",
+    doctorCollectionSummary: "డాక్టర్ సేకరణ సారాంశం",
+    home: "హోమ్",
+    logout: "లాగౌట్",
+    backToPortal: "పోర్టల్ ఎంపికకు తిరిగి వెళ్ళండి",
+    connectedTo: "క్లినిక్ ప్రోకు కనెక్ట్ అయ్యారు"
+  },
+  tamil: {
+    dashboardTitle: "கிராமிய சுகாதார மைய போர்டல்",
+    emergencyPatients: "அவசரநிலை நோயாளிகள்",
+    bookingsPayments: "முன்பதிவுகள் மற்றும் கட்டணங்கள்",
+    newBooking: "புதிய முன்பதிவு",
+    availableDoctors: "கிடைக்கும் டாக்டர்கள்",
+    todaysPatients: "இன்றைய நோயாளிகள்",
+    registerNewPatient: "புதிய நோயாளியை பதிவு செய்யவும்",
+    medicineInventory: "மருந்து சேமிப்பு",
+    viewAll: "அனைத்தையும் காண்க",
+    requestMedicine: "மருந்து கோரிக்கை",
+    requestConsultation: "ஆலோசனை கோரிக்கை",
+    patientRecords: "நோயாளி சாதனைகள்",
+    emergency: "அவசரால்",
+    healthCenterInfo: "சுகாதார மைய தகவல்",
+    medicineRequests: "மருந்து கோரிக்கைகள்",
+    noBookingsToday: "இன்று முன்பதிவுகள் இல்லை",
+    totalCollectedToday: "இன்று சேகரிக்கப்பட்ட மொத்தம்",
+    doctorCollectionSummary: "டாக்டர் சேகரிப்பு சுருக்கம்",
+    home: "முகப்பு",
+    logout: "வெளியேறு",
+    backToPortal: "போர்டல் தேர்வுக்குத் திரும்பு",
+    connectedTo: "கிளினிக் ப்ரோவுடன் இணைக்கப்பட்டுள்ளது"
+  },
+  kannada: {
+    dashboardTitle: "ಗ್ರಾಮೀಣ ಆರೋಗ್ಯ ಕೇಂದ್ರ ಪೋರ್ಟಲ್",
+    emergencyPatients: "ತುರ್ತು ರೋಗಿಗಳು",
+    bookingsPayments: "ಬುಕಿಂಗ್ ಮತ್ತು ಪಾವತಿಗಳು",
+    newBooking: "ಹೊಸ ಬುಕಿಂಗ್",
+    availableDoctors: "ಲಭ್ಯವಿರುವ ಡಾಕ್ಟರ್‌ಗಳು",
+    todaysPatients: "ಇಂದಿನ ರೋಗಿಗಳು",
+    registerNewPatient: "ಹೊಸ ರೋಗಿಯನ್ನು ನೋಂದಾಯಿಸಿ",
+    medicineInventory: "ಔಷಧಿ ಸರಬರಾಜು",
+    viewAll: "ಎಲ್ಲವನ್ನು ನೋಡಿ",
+    requestMedicine: "ಔಷಧಿಗಾಗಿ ವಿನಂತಿಸಿ",
+    requestConsultation: "ಸಲಹೆಗಾಗಿ ವಿನಂತಿಸಿ",
+    patientRecords: "ರೋಗಿ ದಾಖಲೆಗಳು",
+    emergency: "ತುರ್ತು",
+    healthCenterInfo: "ಆರೋಗ್ಯ ಕೇಂದ್ರ ಮಾಹಿತಿ",
+    medicineRequests: "ಔಷಧಿ ವಿನಂತಿಗಳು",
+    noBookingsToday: "ಇಂದಿಗೆ ಬುಕಿಂಗ್ ಇಲ್ಲ",
+    totalCollectedToday: "ಇಂದು ಸಂಗ್ರಹಿಸಿದ ಒಟ್ಟು ಮೊತ್ತ",
+    doctorCollectionSummary: "ಡಾಕ್ಟರ್ ಸಂಗ್ರಹ ಸಾರಾಂಶ",
+    home: "ಮುಖಪುಟ",
+    logout: "ಲಾಗ್ ಔಟ್",
+    backToPortal: "ಪೋರ್ಟಲ್ ಆಯ್ಕೆಗೆ ಹಿಂತಿರುಗಿ",
+    connectedTo: "ಕ್ಲಿನಿಕ್ ಪ್ರೊಗೆ ಸಂಪರ್ಕಿಸಲಾಗಿದೆ"
+  },
+  punjabi: {
+    dashboardTitle: "ਗ੍ਰਾਮੀਣ ਸਿਹਤ ਕੇਂਦਰ ਪੋਰਟਲ",
+    emergencyPatients: "ਐਮਰਜੈਂਸੀ ਮਰੀਜ਼",
+    bookingsPayments: "ਬੁਕਿੰਗ ਅਤੇ ਭੁਗਤਾਨ",
+    newBooking: "ਨਵੀਂ ਬੁਕਿੰਗ",
+    availableDoctors: "ਉਪਲਬਧ ਡਾਕਟਰ",
+    todaysPatients: "ਅੱਜ ਦੇ ਮਰੀਜ਼",
+    registerNewPatient: "ਨਵਾਂ ਮਰੀਜ਼ ਰਜਿਸਟਰ ਕਰੋ",
+    medicineInventory: "ਦਵਾਈ ਸੂਚੀ",
+    viewAll: "ਸਭ ਵੇਖੋ",
+    requestMedicine: "ਦਵਾਈ ਦੀ ਬੇਨਤੀ ਕਰੋ",
+    requestConsultation: "ਸਲਾਹ ਦੀ ਬੇਨਤੀ ਕਰੋ",
+    patientRecords: "ਮਰੀਜ਼ ਰਿਕਾਰਡ",
+    emergency: "ਐਮਰਜੈਂਸੀ",
+    healthCenterInfo: "ਸਿਹਤ ਕੇਂਦਰ ਜਾਣਕਾਰੀ",
+    medicineRequests: "ਦਵਾਈ ਬੇਨਤੀਆਂ",
+    noBookingsToday: "ਅੱਜ ਲਈ ਕੋਈ ਬੁਕਿੰਗ ਨਹੀਂ ਹੈ",
+    totalCollectedToday: "ਅੱਜ ਇਕੱਠਾ ਕੀਤਾ ਕੁੱਲ ਰਕਮ",
+    doctorCollectionSummary: "ਡਾਕਟਰ ਕਲੈਕਸ਼ਨ ਸਾਰਾੰਸ਼",
+    home: "ਘਰ",
+    logout: "ਲਾਗਆਉਟ",
+    backToPortal: "ਪੋਰਟਲ ਚੋਣ ਵਾਪਸ ਜਾਓ",
+    connectedTo: "ਕਲਿਨਿਕ ਪ੍ਰੋ ਨਾਲ ਕਨੈਕਟ ਹੈ"
+  }
+};
+
+// Language options
+const languageOptions = [
+  { value: "english", label: "English" },
+  { value: "telugu", label: "తెలుగు" },
+  { value: "hindi", label: "हिन्दी" },
+  { value: "tamil", label: "தமிழ்" },
+  { value: "kannada", label: "ಕನ್ನಡ" },
+  { value: "punjabi", label: "ਪੰਜਾਬੀ" }
+];
+
+// Helper function to get translated text
+const t = (language: string, key: string) => {
+  return translations[language as keyof typeof translations]?.[key] || translations.english[key] || key;
+};
+
+const RuralCenterDashboard = ({ centerName, onLogout, language }: RuralCenterDashboardProps) => {
+  const [currentLanguage, setCurrentLanguage] = useState(language);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [consultationDialog, setConsultationDialog] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<any>(null);
@@ -84,7 +250,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
   const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
   
   // Health Center configuration
-  const healthCenterId = "health_center_andhra_001";
+  const healthCenterId = "health_center_nabha_001";
   const healthCenterName = centerName;
   
   // Booking system state
@@ -142,7 +308,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       condition: "Diabetes Management",
       patientId: "RHC001",
       phone: "+91 97049 15150",
-      address: "Village Venkatagiri, Andhra Pradesh",
+      address: "Village Venkatagiri, Nabha",
       medicalHistory: "Diagnosed with Type 2 Diabetes 3 years ago. Currently on Metformin 500mg twice daily.",
       allergies: "None known",
       lastVisit: "2024-08-20",
@@ -161,7 +327,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       condition: "Hypertension",
       patientId: "RHC002",
       phone: "+91 97049 15150",
-      address: "Village Tirupati, Andhra Pradesh",
+      address: "Village Tirupati, Nabha",
       medicalHistory: "No significant past medical history. Family history of hypertension.",
       allergies: "Shellfish",
       lastVisit: "First visit",
@@ -210,7 +376,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       name: "Dr. Suresh Reddy",
       specialty: "General Medicine",
       status: "Available",
-      hospital: "District Hospital, Hyderabad",
+      hospital: "District Hospital, Nabha",
       responseTime: "< 5 minutes",
       id: "doctor1",
       avatar: "SR",
@@ -220,7 +386,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       name: "Dr. Anitha Rao",
       specialty: "General Medicine",
       status: "In Consultation",
-      hospital: "Community Health Center, Hyderabad",
+      hospital: "Community Health Center, Nabha",
       responseTime: "15 minutes",
       id: "doctor2",
       avatar: "AR",
@@ -230,7 +396,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       name: "Dr. Prakash Kumar",
       specialty: "General Medicine",
       status: "Available",
-      hospital: "Primary Health Center, Visakhapatnam",
+      hospital: "Primary Health Center, Nabha",
       responseTime: "< 3 minutes",
       id: "doctor3",
       avatar: "PK",
@@ -334,7 +500,11 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
       }
     });
 
-    return unsubscribe;
+    return () => {
+      if (unsubscribe && typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
   }, [healthCenterId]);
 
   const emergencyPatients = [
@@ -856,7 +1026,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
               </div>
               <div>
                 <h1 className="text-lg font-bold text-foreground">{centerName}</h1>
-                <p className="text-xs text-muted-foreground">Rural Health Center Portal</p>
+                <p className="text-xs text-muted-foreground">{t(currentLanguage, 'dashboardTitle')}</p>
               </div>
             </div>
             
@@ -868,7 +1038,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
               className="flex items-center space-x-1"
             >
               <Home className="w-4 h-4" />
-              <span>Home</span>
+              <span>{t(currentLanguage, 'home')}</span>
             </Button>
             
             {/* Back to Portal Selection Button - Desktop */}
@@ -879,22 +1049,42 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
               className="hidden md:flex items-center space-x-1"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back to Portal Selection</span>
+              <span>{t(currentLanguage, 'backToPortal')}</span>
             </Button>
           </div>
           
           <div className="flex items-center space-x-4">
+            {/* Language Selector */}
+            <div className="flex items-center space-x-2">
+              <Globe className="w-4 h-4 text-muted-foreground" />
+              <select 
+                value={currentLanguage} 
+                onChange={(e) => {
+                  const value = e.target.value;
+                  console.log("Language changed to:", value);
+                  setCurrentLanguage(value);
+                }}
+                className="p-1 border rounded text-xs bg-background"
+              >
+                {languageOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
             <div className="flex items-center space-x-2 text-sm">
               <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span className="text-muted-foreground">Connected to Clinic Pro</span>
+              <span className="text-muted-foreground">{t(currentLanguage, 'connectedTo')}</span>
             </div>
             {/* Logout Button - Mobile */}
             <Button variant="outline" onClick={onLogout} className="md:hidden">
-              Logout
+              {t(currentLanguage, 'logout')}
             </Button>
             {/* Logout Button - Desktop */}
             <Button variant="outline" onClick={onLogout} className="hidden md:block">
-              Logout
+              {t(currentLanguage, 'logout')}
             </Button>
           </div>
         </div>
@@ -906,7 +1096,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
           <CardHeader>
             <CardTitle className="flex items-center space-x-2 text-red-700 dark:text-red-400">
               <AlertTriangle className="w-5 h-5" />
-              <span>Emergency Patients</span>
+              <span>{t(currentLanguage, 'emergencyPatients')}</span>
               <Badge variant="destructive">{emergencyPatients.length}</Badge>
             </CardTitle>
           </CardHeader>
@@ -951,13 +1141,13 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <CreditCard className="w-5 h-5 text-blue-600" />
-                  <span>Bookings & Payments</span>
+                  <span>{t(currentLanguage, 'bookingsPayments')}</span>
                 </div>
                 <Dialog open={bookingDialog} onOpenChange={setBookingDialog}>
                   <DialogTrigger asChild>
                     <Button size="sm" variant="outline">
                       <Plus className="w-3 h-3 mr-1" />
-                      New Booking
+                      {t(currentLanguage, 'newBooking')}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-md">
@@ -1104,20 +1294,20 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                 
                 {todaysBookings.length === 0 && (
                   <p className="text-sm text-muted-foreground text-center py-4">
-                    No bookings for today
+                    {t(currentLanguage, 'noBookingsToday')}
                   </p>
                 )}
               </div>
               
               <div className="pt-4 border-t">
                 <div className="flex justify-between items-center">
-                  <span className="font-medium">Total Collected Today:</span>
+                  <span className="font-medium">{t(currentLanguage, 'totalCollectedToday')}:</span>
                   <span className="font-bold text-lg">₹{totalAmountCollected}</span>
                 </div>
                 
                 {/* Doctor Collection Summary */}
                 <div className="mt-4 pt-4 border-t">
-                  <h4 className="font-medium mb-2">Doctor Collection Summary:</h4>
+                  <h4 className="font-medium mb-2">{t(currentLanguage, 'doctorCollectionSummary')}:</h4>
                   <div className="space-y-2">
                     {availableDoctors.map(doctor => {
                       const doctorBookings = todaysBookings.filter(booking => 
@@ -1145,7 +1335,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Stethoscope className="w-5 h-5 text-blue-600" />
-                <span>Available Doctors</span>
+                <span>{t(currentLanguage, 'availableDoctors')}</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -1214,7 +1404,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <Users className="w-5 h-5 text-primary" />
-                <span>Today's Patients</span>
+                <span>{t(currentLanguage, 'todaysPatients')}</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -1250,7 +1440,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                 <DialogTrigger asChild>
                   <Button className="w-full" variant="outline">
                     <Plus className="w-4 h-4 mr-2" />
-                    Register New Patient
+                    {t(currentLanguage, 'registerNewPatient')}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -1521,13 +1711,13 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <Package className="w-5 h-5 text-orange-600" />
-                  <span>Medicine Inventory</span>
+                  <span>{t(currentLanguage, 'medicineInventory')}</span>
                 </div>
                 <Dialog open={inventoryDialog} onOpenChange={setInventoryDialog}>
                   <DialogTrigger asChild>
                     <Button size="sm" variant="outline">
                       <Eye className="w-3 h-3 mr-1" />
-                      View All
+                      {t(currentLanguage, 'viewAll')}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-4xl">
@@ -1643,7 +1833,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                 <DialogTrigger asChild>
                   <Button className="w-full" variant="outline">
                     <Plus className="w-4 h-4 mr-2" />
-                    Request Medicine
+                    {t(currentLanguage, 'requestMedicine')}
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-md">
@@ -1720,7 +1910,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                   <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 mx-auto mb-3 w-fit">
                     <Video className="w-6 h-6" />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-1">Request Consultation</h3>
+                  <h3 className="font-semibold text-foreground mb-1">{t(currentLanguage, 'requestConsultation')}</h3>
                   <p className="text-xs text-muted-foreground">Connect with doctors</p>
                 </CardContent>
               </Card>
@@ -1810,7 +2000,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
               <div className="p-3 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-400 mx-auto mb-3 w-fit">
                 <FileText className="w-6 h-6" />
               </div>
-              <h3 className="font-semibold text-foreground mb-1">Patient Records</h3>
+              <h3 className="font-semibold text-foreground mb-1">{t(currentLanguage, 'patientRecords')}</h3>
               <p className="text-xs text-muted-foreground">View medical history</p>
             </CardContent>
           </Card>
@@ -1822,7 +2012,7 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                   <div className="p-3 rounded-full bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 mx-auto mb-3 w-fit">
                     <AlertTriangle className="w-6 h-6" />
                   </div>
-                  <h3 className="font-semibold text-foreground mb-1">Emergency</h3>
+                  <h3 className="font-semibold text-foreground mb-1">{t(currentLanguage, 'emergency')}</h3>
                   <p className="text-xs text-muted-foreground">Immediate doctor help</p>
                 </CardContent>
               </Card>
@@ -1867,14 +2057,14 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <MapPin className="w-5 h-5 text-primary" />
-                <span>Health Center Information</span>
+                <span>{t(currentLanguage, 'healthCenterInfo')}</span>
               </div>
               {medicineRequests.length > 0 && (
                 <Dialog>
                   <DialogTrigger asChild>
                     <Button size="sm" variant="outline">
                       <FileText className="w-3 h-3 mr-1" />
-                      Medicine Requests ({medicineRequests.length})
+                      {t(currentLanguage, 'medicineRequests')} ({medicineRequests.length})
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-3xl">
@@ -1935,8 +2125,8 @@ const RuralCenterDashboard = ({ centerName, onLogout }: RuralCenterDashboardProp
                 <div className="space-y-1 text-muted-foreground">
                   <p>Name: {centerName}</p>
                   <p>District: Nabha, Punjab</p>
-                  <p>PIN Code: 530001</p>
-                  <p>Phone: +91 891 2234567</p>
+                  <p>PIN Code: 147201</p>
+                  <p>Phone: +91 1765 223456</p>
                 </div>
               </div>
               <div>

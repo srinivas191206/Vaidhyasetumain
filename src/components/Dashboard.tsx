@@ -16,7 +16,8 @@ import {
   Activity,
   Star,
   Home,
-  ArrowLeft
+  ArrowLeft,
+  Globe
 } from "lucide-react";
 import RealTimeNotificationDropdown from "./RealTimeNotificationDropdown";
 import AppointmentsTab from "./AppointmentsTab";
@@ -30,9 +31,162 @@ import VideoConsultation from "./VideoConsultation";
 interface DashboardProps {
   userName: string;
   onLogout?: () => void;
+  language?: string;
 }
 
-const Dashboard = ({ userName, onLogout }: DashboardProps) => {
+// Translation object
+const translations = {
+  english: {
+    welcome: "Welcome back, Dr.",
+    appointmentsToday: "You have",
+    appointmentsTodayCount: "appointments scheduled for today.",
+    home: "Home",
+    appointments: "Appointments",
+    patients: "Patients",
+    feedback: "Feedback",
+    prescriptions: "Prescriptions",
+    messages: "Messages",
+    profile: "Profile",
+    backToPortal: "Back to Portal Selection",
+    logout: "Logout",
+    todaySchedule: "Today's Schedule",
+    recentActivity: "Recent Activity",
+    urgent: "Urgent",
+    startConsultation: "Start Consultation",
+    consultationCompleted: "Consultation completed with",
+    feedbackFrom: "5-star feedback from",
+    ecgResults: "ECG results uploaded for",
+    medicationsSent: "Cardiac medications sent to Rural Health Center"
+  },
+  hindi: {
+    welcome: "वापसी पर स्वागत है, डॉ.",
+    appointmentsToday: "आपके पास है",
+    appointmentsTodayCount: "आज के लिए निर्धारित अपैंटमेंट।",
+    home: "होम",
+    appointments: "अपॉइंटमेंट",
+    patients: "मरीज़",
+    feedback: "प्रतिक्रिया",
+    prescriptions: "नुस्खे",
+    messages: "संदेश",
+    profile: "प्रोफ़ाइल",
+    backToPortal: "पोर्टल चयन पर वापस जाएं",
+    logout: "लॉगआउट",
+    todaySchedule: "आज का अनुसूची",
+    recentActivity: "हाल की गतिविधि",
+    urgent: "तत्काल",
+    startConsultation: "परामर्श शुरू करें",
+    consultationCompleted: "के साथ परामर्श पूर्ण हुआ",
+    feedbackFrom: "से 5-स्टार प्रतिक्रिया",
+    ecgResults: "के लिए ईसीजी परिणाम अपलोड किए गए",
+    medicationsSent: "ग्रामीण स्वास्थ्य केंद्र को कार्डियक दवाएं भेजी गईं"
+  },
+  telugu: {
+    welcome: "తిరిగి రావడం సంతోషంగా ఉంది, డాక్టర్",
+    appointmentsToday: "మీకు ఉంది",
+    appointmentsTodayCount: "ఈ రోజు షెడ్యూల్ చేయబడిన అపాయింట్‌మెంట్‌లు.",
+    home: "హోమ్",
+    appointments: "అపాయింట్‌మెంట్‌లు",
+    patients: "రోగులు",
+    feedback: "అభిప్రాయం",
+    prescriptions: "ప్రిస్క్రిప్షన్లు",
+    messages: "సందేశాలు",
+    profile: "ప్రొఫైల్",
+    backToPortal: "పోర్టల్ ఎంపికకు తిరిగి వెళ్ళండి",
+    logout: "లాగౌట్",
+    todaySchedule: "ఈ రోజు షెడ్యూల్",
+    recentActivity: "ఇటీవలి కార్యాచరణ",
+    urgent: "తుర్తు",
+    startConsultation: "కన్సల్టేషన్ ప్రారంభించండి",
+    consultationCompleted: "తో కన్సల్టేషన్ పూర్తయింది",
+    feedbackFrom: "నుండి 5-స్టార్ అభిప్రాయం",
+    ecgResults: "కోసం ECG ఫలితాలు అప్‌లోడ్ చేయబడ్డాయి",
+    medicationsSent: "గ్రామీణ ఆరోగ్య కేంద్రానికి హృదయ మందులు పంపబడ్డాయి"
+  },
+  tamil: {
+    welcome: "மீண்டும் வருகைக்கு நல்வரவு, டாக்டர்",
+    appointmentsToday: "உங்களிடம் உள்ளது",
+    appointmentsTodayCount: "இன்று திட்டமிடப்பட்டுள்ள நியமனங்கள்.",
+    home: "முகப்பு",
+    appointments: "நியமனங்கள்",
+    patients: "நோயாளிகள்",
+    feedback: "கருத்து",
+    prescriptions: "மருந்து விதிப்புகள்",
+    messages: "செய்திகள்",
+    profile: "சுயவிவரம்",
+    backToPortal: "போர்டல் தேர்வுக்குத் திரும்பு",
+    logout: "வெளியேறு",
+    todaySchedule: "இன்றைய அட்டவணை",
+    recentActivity: "சமீபத்திய செயல்பாடு",
+    urgent: "அவசரம்",
+    startConsultation: "ஆலோசனையைத் தொடங்கவும்",
+    consultationCompleted: "உடன் ஆலோசனை முடிந்தது",
+    feedbackFrom: "இலிருந்து 5-ஸ்டார் கருத்து",
+    ecgResults: "க்கான ஈசிசி முடிவுகள் பதிவேற்றப்பட்டன",
+    medicationsSent: "கிராமிய சுகாதார மையத்திற்கு இதய மருந்துகள் அனுப்பப்பட்டன"
+  },
+  kannada: {
+    welcome: "ಮರು ಬಂದಿದ್ದಕ್ಕೆ ಸುಸ್ವಾಗತ, ಡಾಕ್ಟರ್",
+    appointmentsToday: "ನಿಮಗೆ ಇದೆ",
+    appointmentsTodayCount: "ಇಂದು ನಿಗದಿಪಡಿಸಲಾದ ಭೇಟಿಗಳು.",
+    home: "ಮುಖಪುಟ",
+    appointments: "ಭೇಟಿಗಳು",
+    patients: "ರೋಗಿಗಳು",
+    feedback: "ಪ್ರತಿಕ್ರಿಯೆ",
+    prescriptions: "ಪ್ರಿಸ್ಕ್ರಿಪ್ಶನ್‌ಗಳು",
+    messages: "ಸಂದೇಶಗಳು",
+    profile: "ಪ್ರೊಫೈಲ್",
+    backToPortal: "ಪೋರ್ಟಲ್ ಆಯ್ಕೆಗೆ ಹಿಂತಿರುಗಿ",
+    logout: "ಲಾಗ್ ಔಟ್",
+    todaySchedule: "ಇಂದಿನ ವೇಳಾಪಟ್ಟಿ",
+    recentActivity: "ಇತ್ತೀಚಿನ ಚಟುವಟಿಕೆ",
+    urgent: "ತುರ್ತು",
+    startConsultation: "ಸಲಹೆ ಪ್ರಾರಂಭಿಸಿ",
+    consultationCompleted: "ಜೊತೆ ಸಲಹೆ ಪೂರ್ಣಗೊಂಡಿದೆ",
+    feedbackFrom: "ನಿಂದ 5-ಸ್ಟಾರ್ ಪ್ರತಿಕ್ರಿಯೆ",
+    ecgResults: "ಗಾಗಿ ಇಸಿಜಿ ಫಲಿತಾಂಶಗಳನ್ನು ಅಪ್‌ಲೋಡ್ ಮಾಡಲಾಗಿದೆ",
+    medicationsSent: "ಗ್ರಾಮೀಣ ಆರೋಗ್ಯ ಕೇಂದ್ರಕ್ಕೆ ಹೃದಯ ಮಾತ್ರೆಗಳನ್ನು ಕಳುಹಿಸಲಾಗಿದೆ"
+  },
+  punjabi: {
+    welcome: "ਵਾਪਸੀ ਲਈ ਜੀ ਆਇਆਂ ਨੂੰ, ਡਾਕਟਰ",
+    appointmentsToday: "ਤੁਹਾਡੇ ਕੋਲ ਹੈ",
+    appointmentsTodayCount: "ਅੱਜ ਲਈ ਨਿਰਧਾਰਤ ਐਪੋਇੰਟਮੈਂਟ।",
+    home: "ਘਰ",
+    appointments: "ਐਪੋਇੰਟਮੈਂਟ",
+    patients: "ਮਰੀਜ਼",
+    feedback: "ਫੀਡਬੈਕ",
+    prescriptions: "ਪ੍ਰੀਸਕ੍ਰਿਪਸ਼ਨ",
+    messages: "ਸੁਨੇਹੇ",
+    profile: "ਪ੍ਰੋਫਾਈਲ",
+    backToPortal: "ਪੋਰਟਲ ਚੋਣ ਵਾਪਸ ਜਾਓ",
+    logout: "ਲਾਗਆਉਟ",
+    todaySchedule: "ਅੱਜ ਦਾ ਸ਼ੈਡਿਊਲ",
+    recentActivity: "ਹਾਲ ਹੀ ਦੀ ਗਤੀਵਿਧੀ",
+    urgent: "ਐਮਰਜੈਂਸੀ",
+    startConsultation: "ਸਲਾਹ ਸ਼ੁਰੂ ਕਰੋ",
+    consultationCompleted: "ਨਾਲ ਸਲਾਹ ਪੂਰੀ ਹੋਈ",
+    feedbackFrom: "ਤੋਂ 5-ਸਟਾਰ ਫੀਡਬੈਕ",
+    ecgResults: "ਲਈ ECG ਨਤੀਜੇ ਅਪਲੋਡ ਕੀਤੇ ਗਏ",
+    medicationsSent: "ਗ੍ਰਾਮੀਣ ਸਿਹਤ ਕੇਂਦਰ ਨੂੰ ਕਾਰਡੀਏਕ ਦਵਾਈਆਂ ਭੇਜੀਆਂ ਗਈਆਂ"
+  }
+};
+
+// Language options
+const languageOptions = [
+  { value: "english", label: "English" },
+  { value: "telugu", label: "తెలుగు" },
+  { value: "hindi", label: "हिन्दी" },
+  { value: "tamil", label: "தமிழ்" },
+  { value: "kannada", label: "ಕನ್ನಡ" },
+  { value: "punjabi", label: "ਪੰਜਾਬੀ" }
+];
+
+// Helper function to get translated text
+const t = (language: string, key: string) => {
+  return translations[language as keyof typeof translations]?.[key] || translations.english[key] || key;
+};
+
+const Dashboard = ({ userName, onLogout, language = "english" }: DashboardProps) => {
+  const [currentLanguage, setCurrentLanguage] = useState(language);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("dashboard");
   const [videoConsultation, setVideoConsultation] = useState<{
@@ -45,19 +199,19 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
   const doctorName = `Dr. ${userName}`;
 
   const quickActions = [
-    { name: "Appointments", icon: Calendar, color: "bg-medical-blue/10 text-medical-blue", key: "appointments" },
-    { name: "Patients", icon: Users, color: "bg-success/10 text-success", key: "patients" },
-    { name: "Feedback", icon: Star, color: "bg-warning/10 text-warning", key: "feedback" },
-    { name: "Prescriptions", icon: Pill, color: "bg-destructive/10 text-destructive", key: "prescriptions" }
+    { name: t(currentLanguage, "appointments"), icon: Calendar, color: "bg-medical-blue/10 text-medical-blue", key: "appointments" },
+    { name: t(currentLanguage, "patients"), icon: Users, color: "bg-success/10 text-success", key: "patients" },
+    { name: t(currentLanguage, "feedback"), icon: Star, color: "bg-warning/10 text-warning", key: "feedback" },
+    { name: t(currentLanguage, "prescriptions"), icon: Pill, color: "bg-destructive/10 text-destructive", key: "prescriptions" }
   ];
 
   // Bottom navigation items
   const bottomNavItems = [
-    { id: "dashboard", name: "Home", icon: Home },
-    { id: "appointments", name: "Appointments", icon: Calendar },
-    { id: "patients", name: "Patients", icon: Users },
-    { id: "messages", name: "Messages", icon: MessageCircle },
-    { id: "profile", name: "Profile", icon: User }
+    { id: "dashboard", name: t(currentLanguage, "home"), icon: Home },
+    { id: "appointments", name: t(currentLanguage, "appointments"), icon: Calendar },
+    { id: "patients", name: t(currentLanguage, "patients"), icon: Users },
+    { id: "messages", name: t(currentLanguage, "messages"), icon: MessageCircle },
+    { id: "profile", name: t(currentLanguage, "profile"), icon: User }
   ];
 
   return (
@@ -81,6 +235,26 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
 
           {/* Search and Actions */}
           <div className="flex items-center space-x-4">
+            {/* Language Selector */}
+            <div className="flex items-center space-x-2">
+              <Globe className="w-4 h-4 text-muted-foreground" />
+              <select 
+                value={currentLanguage} 
+                onChange={(e) => {
+                  const value = e.target.value;
+                  console.log("Language changed to:", value);
+                  setCurrentLanguage(value);
+                }}
+                className="p-1 border rounded text-xs bg-background"
+              >
+                {languageOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            
             <div className="relative hidden sm:block">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
@@ -124,13 +298,13 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
               className="hidden md:flex items-center space-x-1"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back to Portal Selection</span>
+              <span>{t(currentLanguage, "backToPortal")}</span>
             </Button>
             
             {/* Logout Button */}
             {onLogout && (
               <Button variant="outline" onClick={onLogout} className="md:hidden">
-                Logout
+                {t(currentLanguage, "logout")}
               </Button>
             )}
           </div>
@@ -146,10 +320,10 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h1 className="text-2xl font-bold text-foreground mb-2">
-                      Welcome back, Dr. {userName}!
+                      {t(currentLanguage, "welcome")} {userName}!
                     </h1>
                     <p className="text-muted-foreground">
-                      You have <span className="font-semibold text-primary">5 appointments</span> scheduled for today.
+                      {t(currentLanguage, "appointmentsToday")} <span className="font-semibold text-primary">5 {t(currentLanguage, "appointments")}</span> {t(currentLanguage, "appointmentsTodayCount")}
                     </p>
                   </div>
                   <div className="hidden md:block">
@@ -186,7 +360,7 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Clock className="w-5 h-5 text-primary" />
-                    <span>Today's Schedule</span>
+                    <span>{t(currentLanguage, "todaySchedule")}</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -249,7 +423,7 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
                           <span className="font-medium text-primary">{appointment.time}</span>
                           {appointment.urgent && (
                             <span className="px-2 py-1 text-xs bg-destructive/10 text-destructive rounded-full">
-                              Urgent
+                              {t(currentLanguage, "urgent")}
                             </span>
                           )}
                         </div>
@@ -273,7 +447,7 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
                           }
                         })}
                       >
-                        Start Consultation
+                        {t(currentLanguage, "startConsultation")}
                       </Button>
                     </div>
                   ))}
@@ -285,15 +459,15 @@ const Dashboard = ({ userName, onLogout }: DashboardProps) => {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Activity className="w-5 h-5 text-primary" />
-                    <span>Recent Activity</span>
+                    <span>{t(currentLanguage, "recentActivity")}</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {[
-                    { activity: "Consultation completed with Meera Reddy", time: "2 hours ago", type: "consultation" },
-                    { activity: "5-star feedback from Vikram Patel", time: "4 hours ago", type: "message" },
-                    { activity: "ECG results uploaded for Rajesh Kumar", time: "6 hours ago", type: "results" },
-                    { activity: "Cardiac medications sent to Rural Health Center", time: "1 day ago", type: "prescription" }
+                    { activity: `${t(currentLanguage, "consultationCompleted")} Meera Reddy`, time: "2 hours ago", type: "consultation" },
+                    { activity: `${t(currentLanguage, "feedbackFrom")} Vikram Patel`, time: "4 hours ago", type: "message" },
+                    { activity: `${t(currentLanguage, "ecgResults")} Rajesh Kumar`, time: "6 hours ago", type: "results" },
+                    { activity: `${t(currentLanguage, "medicationsSent")}`, time: "1 day ago", type: "prescription" }
                   ].filter(activity => 
                     activity.activity.toLowerCase().includes(searchQuery.toLowerCase())
                   ).map((activity, index) => (
